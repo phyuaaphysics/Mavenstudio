@@ -1,1179 +1,505 @@
 <!DOCTYPE html>
-<!--
-    ╔══════════════════════════════════════════════════════════════════════════╗
-    ║  MAVEN — English Learning Login Interface                                ║
-    ║  Ning Po No.2 College · Department of English                            ║
-    ╠══════════════════════════════════════════════════════════════════════════╣
-    ║                                                                          ║
-    ║  📐 DESIGN SPEC                                                          ║
-    ║  ─────────────                                                           ║
-    ║  • Theme:   Parchment (warm cream / sepia / antique gold)               ║
-    ║  • Mood:    Academic, refined, like a vintage English dictionary       ║
-    ║  • Layout:  Single centered glass card on a fluid background            ║
-    ║                                                                          ║
-    ║  🎨 COLOR PALETTE                                                        ║
-    ║  ────────────────                                                        ║
-    ║  Background default : #E8DCBE   warm parchment cream                     ║
-    ║  Glass card          : rgba(252,246,230,0.55)  + blur(25px)             ║
-    ║  Card border         : rgba(139,111,61,0.30)   sepia hairline            ║
-    ║  Primary text        : #3E2C18   deep brown                              ║
-    ║  Secondary text      : #5C4A2E   medium brown                            ║
-    ║  Accent / brand      : #8B6F3D   antique gold                            ║
-    ║  Success accent      : #5C7C3E   olive green                             ║
-    ║  Loading / progress  : #8B6F3D   antique gold (replaces Tiffany blue)    ║
-    ║                                                                          ║
-    ║  🔤 TYPOGRAPHY                                                           ║
-    ║  ──────────────                                                          ║
-    ║  Dept school name  : Geomini  bold uppercase   (loaded from system)      ║
-    ║  Dept subtitle     : Geomini  semibold        (fallback: Geomanist,      ║
-    ║                                              Futura, Avenir, Century…)   ║
-    ║  App name "Maven"  : Playfair Display  bold    (serif, humanist)         ║
-    ║  UI body / labels  : Inter      medium/semibold (UI sans-serif)         ║
-    ║  Floating words    : Playfair Display  serif   (dictionary entry style)  ║
-    ║  Footer copyright  : Inter      uppercase      (small caps)              ║
-    ║                                                                          ║
-    ║  🌀 MOTION CHOREOGRAPHY                                                   ║
-    ║  ──────────────────────                                                  ║
-    ║  Ambient:    Dictionary headwords + part-of-speech drift in background   ║
-    ║              (random position, fade in/out, 2.6–4.4s lifecycle)          ║
-    ║                                                                          ║
-    ║  Page load:  0.00s  parent card fades in                                 ║
-    ║              0.15s  dept school name rises in                            ║
-    ║              1.35s  dept fades out                                       ║
-    ║              1.50s  app row (icon + Maven) rises in (overlaps dept out)  ║
-    ║              2.15s  final state: dept hidden, app shown                  ║
-    ║                                                                          ║
-    ║  Click Maven: Smooth transit — app fades out (0.6s) → dept rises in     ║
-    ║              (0.6s) → dept fades out (0.6s) → app rises in (0.65s).     ║
-    ║              Same keyframes as initial load, replayable infinitely.      ║
-    ║                                                                          ║
-    ║  Login:       Pre-launch fade-out → progress bar 0→100% →               ║
-    ║              Welcome modal (iOS frosted glass) → redirect.               ║
-    ║                                                                          ║
-    ║  🏗️  ARCHITECTURE                                                         ║
-    ║  ─────────────────                                                       ║
-    ║  Single-file SPA, vanilla HTML/CSS/JS (no build step).                  ║
-    ║  Backend: Google Apps Script "Guard API" for credential validation.      ║
-    ║  PWA: standalone display, theme-color #8B6F3D, app icon linked.         ║
-    ║  Background: optional Google Sheet ELEMENTS!LOGIN_BG override.           ║
-    ║  Auth result cached in localStorage (jwt_token, user_role, identity).    ║
-    ║                                                                          ║
-    ╚══════════════════════════════════════════════════════════════════════════╝
--->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Maven | English Learning</title>
-
-    <!-- Favicon -->
-    <link class="favicon" rel="icon" type="image/jpeg" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
-    <link class="shortcut icon" rel="shortcut icon" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Maven - English Learning</title>
     
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#8B6F3D">
+    <!-- iOS PWA Status Bar Fix -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Maven">
-    <link class="apple-touch-icon" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
     
-    <!-- 外部 Manifest 連結 -->
-    <link class="manifest" rel="manifest" href="https://phyuaaphysics.github.io/phyustudio/manifest.json">
-
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
     <style>
-        /* =====================================================================
-           🎨 STYLESHEET INDEX
-           ───────────────────
-           1. Keyframes          — fadeIn, formulaFade, fadeRise, fadeFall
-           2. Base / Body        — parchment background, transitions
-           3. Glass card         — frosted card with sepia border
-           4. Form controls      — input pill, button pill (hover = deep brown)
-           5. Formula container  — full-bleed ambient word layer
-           6. Dictionary words   — headword (serif bold) + POS (italic sepia)
-           7. iOS modal          — frosted glass welcome / status dialog
-           8. iOS button         — interactive micro-bounce on press
-           ===================================================================== */
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
+        
+        :root {
+            --mint-deep: #0c4a6e;
+            --mint-primary: #0ea5e9; 
+            --mint-accent: #38bdf8;
+            --mint-bg: #f0f9ff;
+            --mint-glass: rgba(240, 249, 255, 0.85); 
+            --mint-nav-glass: rgba(255, 255, 255, 0.75);
+            --sage-deep: #1e3a5f;
+            --sage-muted: #64748b;
+            --sage-active: #0284c7;
         }
 
-        @keyframes formulaFade {
-            0% { opacity: 0; transform: scale(0.88) translateY(10px); filter: blur(4px); }
-            20% { opacity: 0.55; transform: scale(1) translateY(0); filter: blur(0px); }
-            80% { opacity: 0.55; transform: scale(1.03) translateY(-5px); filter: blur(0px); }
-            100% { opacity: 0; transform: scale(1.08) translateY(-15px); filter: blur(2px); }
-        }
-
-        /* ==========================================================================
-           💎 Header sequence animation: dept and app row share the same position
-              and use the same keyframe (fadeRise) 💎
-           ========================================================================== */
-        @keyframes fadeRise {
-            0%   { opacity: 0; transform: translateY(12px); filter: blur(3px); }
-            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
-        }
-
-        @keyframes fadeFall {
-            0%   { opacity: 1; transform: translateY(0); filter: blur(0); }
-            100% { opacity: 0; transform: translateY(-10px); filter: blur(2px); }
-        }
-
-        /* 初始載入：學院抬頭先浮出 → 淡出 → App 列浮入 */
-        .dept-lifecycle {
-            opacity: 0;
-            animation: fadeRise 0.6s 0.15s cubic-bezier(0.22, 1, 0.36, 1) forwards,
-                       fadeFall 0.6s 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
-        .app-row-slide {
-            opacity: 0;
-            animation: fadeRise 0.65s 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
-        /* 💎 Replay 動畫由 JS 的 Web Animations API 直接驅動，無需額外 class 💎 */
-
-        .fade-in {
-            animation: fadeIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
-        .loading-bar-container {
-            width: 80vw;
-            max-width: 280px;
-            height: 12px; /* 調整高度，與綠色膠囊 progress bar 高度契合 */
-            background: #E5E5EA; /* iOS 標準未加載灰色軌跡 */
-            border-radius: 9999px;
-            overflow: hidden;
-            display: none;
-            z-index: 10;
-        }
-
-        .loading-bar-progress {
-            width: 0%;
+        html { 
+            scroll-behavior: smooth; 
             height: 100%;
-            background: #8B6F3D; /* 💎 羊皮紙主題：古典金棕色調 💎 */
-            border-radius: 9999px;
-            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; 
         }
 
         body {
-            /* 羊皮紙主題：暖米色基底，後續若 Google 試算表載入 LOGIN_BG 圖片會自動覆蓋 */
-            background-color: #E8DCBE;
-            background-repeat: no-repeat;
-            background-position: center center;
-            background-size: cover;
-            color: #3E2C18;
             font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            overflow: hidden;
-            transition: background 1.2s cubic-bezier(0.25, 1, 0.2, 1), background-color 1.2s cubic-bezier(0.25, 1, 0.2, 1);
-            touch-action: manipulation;
-        }
-
-        #status-text {
-            min-height: 1.5em;
-            z-index: 10;
-        }
-
-        /* 磨砂玻璃卡片樣式 - 羊皮紙主題 */
-        .glass-card {
-            background: rgba(252, 246, 230, 0.55);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(139, 111, 61, 0.3);
-            box-shadow: 0 30px 70px rgba(89, 64, 32, 0.18);
-            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
-                        transform 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
-                        background 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
-                        border-color 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
-                        box-shadow 1.2s cubic-bezier(0.25, 1, 0.2, 1),
-                        backdrop-filter 1.2s cubic-bezier(0.25, 1, 0.2, 1);
-        }
-
-        /* 視差阻尼位移動畫 */
-        .parallax-item {
-            transition: transform 1.2s cubic-bezier(0.25, 1, 0.2, 1), opacity 1.0s cubic-bezier(0.25, 1, 0.2, 1);
-        }
-
-        /* 藥丸型輸入框 - 羊皮紙主題 */
-        .input-pill {
-            background: rgba(252, 246, 230, 0.92);
-            border: 1px solid rgba(139, 111, 61, 0.25);
-            transition: all 0.3s ease;
-        }
-        .input-pill:focus {
-            background: rgba(255, 251, 240, 0.98);
-            box-shadow: 0 4px 15px rgba(89, 64, 32, 0.08);
-        }
-
-        /* 藥丸型登入按鈕 - 羊皮紙主題 */
-        .btn-pill {
-            background: rgba(232, 220, 190, 0.85);
-            border: 1px solid rgba(139, 111, 61, 0.35);
-            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            background-color: var(--mint-bg);
+            color: var(--mint-deep);
             -webkit-tap-highlight-color: transparent;
-        }
-        .btn-pill:hover {
-            background: #3E2C18;
-            color: #FCF6E6;
-            box-shadow: 0 4px 15px rgba(62, 44, 24, 0.25);
-        }
-        .btn-pill:active {
-            transform: scale(0.97);
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 0;
         }
 
-        #formula-container {
-            position: fixed;
-            top: 0;left: 0;width: 100%;height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 1; 
-            transition: opacity 1.5s cubic-bezier(0.25, 1, 0.2, 1);
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #page-loader {
+            position: fixed; inset: 0; background-color: var(--mint-bg); z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        #page-loader.active { opacity: 1; visibility: visible; }
+        
+        .logo-bar {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            z-index: 120;
+            background-color: rgba(240, 249, 255, 0.85);
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+            padding-bottom: 12px;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .formula {
-            position: absolute;
-            font-family: 'Times New Roman', serif;
-            font-style: italic;
-            font-weight: 600;
-            color: #1e293b;
-            opacity: 0;
-            white-space: nowrap;
-            text-shadow: 0 0 15px rgba(255,255,255,0.85);
-            will-change: transform, opacity;
-        }
-
-        /* 💎 字典風格浮動字彙樣式 (Dictionary floating style) 💎 */
-        .dict-word {
-            position: absolute;
+        #main-logo {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: left center;
+            will-change: transform;
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1;
-            opacity: 0;
-            white-space: nowrap;
-            will-change: transform, opacity;
-            text-shadow: 0 0 18px rgba(255,255,255,0.92);
+            align-items: center;
+            gap: 12px;
         }
 
-        .dict-headword {
-            font-family: 'Playfair Display', 'Charter', 'Times New Roman', serif;
+        .scrolled #main-logo { transform: scale(0.75); }
+
+        #page-content { padding-top: calc(env(safe-area-inset-top, 0px) + 85px); }
+
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            gap: 20px;
+            padding: 10px 0 40px 0;
+            width: 100%;
+        }
+
+        .poster-card { 
+            aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #bae6fd; 
+            position: relative; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; 
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 12px -4px rgba(12, 74, 110, 0.1);
+        }
+        
+        .poster-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(12, 74, 110, 0.2); }
+
+        .card-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .card-name {
+            font-size: 12px;
             font-weight: 600;
-            color: #3E2C18;
-            letter-spacing: -0.005em;
-            line-height: 1;
+            color: var(--mint-deep);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .dict-pos {
-            font-family: 'Playfair Display', 'Charter', 'Times New Roman', serif;
-            font-style: italic;
-            font-weight: 400;
-            color: #8B6F3D;
-            margin-top: 4px;
-            letter-spacing: 0.01em;
-            line-height: 1;
+        .hero-container-framed {
+            border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px;
+            overflow: hidden; position: relative; background-color: #000; 
         }
 
-        /* ==========================================================================
-           💎 iOS premium high-transparency frosted glass modal style with
-              non-linear transition animation 💎
-           ========================================================================== */
-        .ios-overlay-blur {
-            background: rgba(255, 255, 255, 0.01);
-            /* 💎 核心修改：移除遮罩層的模糊濾鏡與暗色，讓背景 100% 完全透亮 💎 */
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .section-hidden { display: none !important; }
 
-        .ios-glass-card {
-            background: rgba(252, 246, 230, 0.78) !important;
-            backdrop-filter: blur(40px) saturate(180%) !important;
-            -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
-            border: 1px solid rgba(139, 111, 61, 0.35) !important;
-            box-shadow: 
-                0 4px 30px rgba(89, 64, 32, 0.04),
-                0 30px 70px rgba(62, 44, 24, 0.18),
-                inset 0 1px 1px rgba(255, 248, 225, 0.7) !important;
-            transform: scale(0.85) translateY(30px);
+        #iframe-container {
+            position: fixed; inset: 0; z-index: 400;
+            background: black; display: none;
             opacity: 0;
-            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            
-            /* 💎 歡迎視窗全面載入 Apple 官方字型美學 💎 */
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-
-        .ios-glass-card.active {
-            transform: scale(1) translateY(0);
+        #iframe-container.active { 
+            display: block;
             opacity: 1;
         }
-
-        /* iOS 微震動感按鈕 - 羊皮紙主題 */
-        .ios-btn {
-            background: rgba(252, 246, 230, 0.95);
-            border: 1px solid rgba(139, 111, 61, 0.2);
-            box-shadow: 0 4px 15px rgba(89, 64, 32, 0.04), inset 0 1px 0 rgba(255, 251, 235, 0.95);
-            color: #3E2C18;
+        
+        .iframe-close-btn {
+            position: absolute; top: calc(env(safe-area-inset-top, 0px) + 15px);
+            right: 20px; z-index: 410;
+            width: 40px; height: 40px; background: rgba(0,0,0,0.4);
+            color: white; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 20px;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            -webkit-tap-highlight-color: transparent;
         }
-        .ios-btn:hover {
-            background: #3E2C18;
-            color: #FCF6E6;
-            box-shadow: 0 8px 25px rgba(62, 44, 24, 0.2);
-            transform: translateY(-1px);
+        .iframe-close-btn:hover {
+            background: rgba(0,0,0,0.6);
+            transform: scale(1.1);
         }
-        .ios-btn:active {
-            transform: scale(0.96) translateY(0);
-            background: rgba(62, 44, 24, 0.92);
-            color: #FCF6E6;
+
+        .dock-wrapper {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s;
+            width: auto;
+            min-width: 280px;
+        }
+
+        .dock-wrapper.collapsed { transform: translateX(-50%) translateY(200px); opacity: 0; }
+
+        .dock-nav {
+            background-color: rgba(30, 58, 95, 0.85); 
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid rgba(14, 165, 233, 0.3);
+            padding: 12px 14px;
+            border-radius: 42px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex; align-items: center; justify-content: center; gap: 14px;
+        }
+
+        .dock-toggle-btn {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            color: rgba(255,255,255,0.4); cursor: pointer; font-size: 14px;
+        }
+
+        .dock-content { display: flex; align-items: center; gap: 14px; }
+
+        .dock-item {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            color: var(--sage-muted); transition: all 0.3s; min-width: 58px;
+            background: transparent; border: none; cursor: pointer;
+        }
+
+        .dock-item i { font-size: 1.6rem; }
+        .dock-item span { font-size: 9px; font-weight: 500; opacity: 0.7; }
+        .dock-item.active { color: white; }
+
+        .dock-trigger-bar {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px; height: 5px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px; z-index: 199; cursor: pointer; display: none;
+        }
+        .dock-wrapper.collapsed + .dock-trigger-bar { display: block; }
+
+        .section-title { font-size: 1.15rem; font-weight: 800; color: var(--mint-deep); margin-bottom: 16px; border-left: 4px solid var(--mint-primary); padding-left: 12px; }
+
+        @media (max-width: 768px) {
+            .hero-container-framed { border-radius: 0; }
+            .dock-wrapper { width: 92%; max-width: 400px; }
+            #page-content { padding-top: calc(env(safe-area-inset-top, 0px) + 115px); }
+        }
+
+        /* ================= Day/Night UI Core Animation ================= */
+
+        body {
+            transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        opacity 0.4s ease;
+        }
+
+        body {
+            background-color: var(--mint-bg);
+            color: var(--mint-deep);
+        }
+
+        body.dark-mode {
+            --mint-deep: #f0f9ff;
+            --mint-primary: #38bdf8;
+            --mint-accent: #0ea5e9;
+            --mint-bg: #0c1222;
+            --mint-glass: rgba(12, 18, 34, 0.85);
+            --mint-nav-glass: rgba(12, 18, 34, 0.75);
+            --sage-deep: #e2e8f0;
+            --sage-muted: #94a3b8;
+            --sage-active: #38bdf8;
+            
+            background-color: var(--mint-bg);
+            color: var(--mint-deep);
+        }
+
+        /* Dark Mode UI Elements */
+        body.dark-mode .logo-bar {
+            background-color: rgba(12, 18, 34, 0.85);
+            border-bottom-color: rgba(56, 189, 248, 0.1);
+        }
+        body.dark-mode #main-logo span {
+            color: #38bdf8;
+        }
+        body.dark-mode .poster-card {
+            background: #112233;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        body.dark-mode .card-name {
+            background: rgba(17, 34, 51, 0.6);
+            border-color: rgba(56, 189, 248, 0.1);
+            color: #e2e8f0;
+        }
+        body.dark-mode #main-content h2.section-title {
+            color: #38bdf8;
+            border-left-color: #38bdf8;
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen m-0">
+<body class="pb-40 hide-scrollbar">
 
-    <!-- 背景公式動畫容器 -->
-    <div id="formula-container"></div>
-
-    <!-- 登入卡片主畫面 -->
-    <div id="landing-screen" class="fade-in glass-card w-[90%] max-w-[450px] rounded-[2.5rem] p-10 sm:p-12 flex flex-col items-center text-center space-y-8 relative z-10">
-        
-        <!-- App Icon + Maven 水平排列 (新 APP 名稱) — 抬頭與 app row 同位置 crossfade -->
-        <div class="relative w-full fade-in parallax-item" id="item-icon-title" style="min-height: 120px;">
-            <!-- 💎 系所抬頭：兩行設計，Geomini 字型，NING PO NO.2 COLLEGE 大於 Department of English 💎 -->
-            <div id="dept-row" class="dept-lifecycle absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <p class="text-[#3E2C18] font-bold text-2xl sm:text-3xl leading-[1.1] tracking-[0.04em]"
-                   style="font-family: 'Geomini', 'Geomanist', 'Futura', 'Avenir Next', 'Century Gothic', 'Trebuchet MS', sans-serif; text-shadow: 0 1px 0 rgba(255,251,235,0.5);">
-                    NING PO NO.2 COLLEGE
-                </p>
-                <p class="mt-2 text-[#8B6F3D] font-semibold text-sm sm:text-base leading-[1.2] tracking-[0.22em]"
-                   style="font-family: 'Geomini', 'Geomanist', 'Futura', 'Avenir Next', 'Century Gothic', 'Trebuchet MS', sans-serif;">
-                    Department of English
-                </p>
-            </div>
-            
-            <!-- 💎 App 名稱列 (icon + Maven) — 與抬頭共用 fadeRise，於同位置 crossfade 浮入，點擊觸發動畫重播 💎 -->
-            <div id="app-row" class="app-row-slide absolute inset-0 flex items-center justify-center gap-5 cursor-pointer select-none" onclick="replayAnimation()">
-                <img 
-                    src="https://i.ibb.co/zVgbyJvd/appeng.jpg" 
-                    alt="Maven Icon" 
-                    class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-lg transition-all duration-700 border border-[#8B6F3D]/20"
-                    onerror="this.src='https://via.placeholder.com/512x512?text=Maven'"
-                >
-                <h1 class="text-[#3E2C18] font-bold tracking-tight text-4xl sm:text-5xl leading-none select-none"
-                    style="font-family: 'Playfair Display', 'Cinzel', 'Times New Roman', serif;">
-                    Maven
-                </h1>
-            </div>
-        </div>
-
-        <!-- 登入表單 -->
-        <div class="w-full flex flex-col items-center space-y-3 pt-2 parallax-item" id="item-form">
-            <input 
-                type="text" 
-                id="username" 
-                placeholder="USERNAME" 
-                onkeydown="if(event.key === 'Enter') handleLogin(event)"
-                class="input-pill w-full max-w-[270px] h-10 px-6 rounded-full text-[#3E2C18] placeholder-[#5C4A2E]/40 focus:outline-none text-center text-[10px] tracking-[0.25em] font-medium"
-                autocomplete="off"
-            >
-            <input 
-                type="password" 
-                id="password" 
-                placeholder="PASSWORD" 
-                onkeydown="if(event.key === 'Enter') handleLogin(event)"
-                class="input-pill w-full max-w-[270px] h-10 px-6 rounded-full text-[#3E2C18] placeholder-[#5C4A2E]/40 focus:outline-none text-center text-[#3E2C18] text-center text-[10px] tracking-[0.25em] font-medium"
-            >
-            
-            <!-- 錯誤訊息提示區 -->
-            <p id="error-msg" class="text-red-700 text-[9px] tracking-widest min-h-[14px] opacity-0 transition-opacity duration-300">
-                Invalid username or password
-            </p>
-        </div>
-
-        <!-- 登入按鈕區與內嵌式進度條 -->
-        <div class="w-full flex flex-col items-center parallax-item" id="item-button">
-            <button 
-                id="launch-btn"
-                onmouseenter="playHoverSound()"
-                onclick="handleLogin(event)"
-                class="btn-pill w-full max-w-[270px] h-10 rounded-full text-[#3E2C18] text-[10px] font-semibold tracking-[0.25em] uppercase transition-all duration-500"
-            >
-                Login & Browse
-            </button>
-
-            <!-- 隱藏的內嵌進度條，啟動時浮現於按鈕下方 -->
-            <!-- 💎 核心修改：移除 mt-6，改用負 margin 及置中 translateY 來把整個過渡組件向上提升，使其完全居中 💎 -->
-            <div id="loading-inline-container" class="w-full max-w-[270px] -mt-10 opacity-0 transition-all duration-1000 hidden flex flex-col items-center translate-y-[-10px]">
-                
-                <!-- 💎 旋轉器顏色：羊皮紙金棕 (#8B6F3D) 💎 -->
-                <div class="relative w-12 h-12 mb-4 animate-spin">
-                    <svg class="w-full h-full text-[#8B6F3D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-                        <line x1="12" y1="5" x2="12" y2="2" opacity="1.0" />
-                        <line x1="17" y1="7" x2="19.1" y2="4.9" opacity="0.87" />
-                        <line x1="19" y1="12" x2="22" y2="12" opacity="0.75" />
-                        <line x1="17" y1="17" x2="19.1" y2="19.1" opacity="0.62" />
-                        <line x1="12" y1="19" x2="12" y2="22" opacity="0.5" />
-                        <line x1="7" y1="17" x2="4.9" y2="19.1" opacity="0.37" />
-                        <line x1="5" y1="12" x2="2" y2="12" opacity="0.25" />
-                        <line x1="7" y1="7" x2="4.9" y2="4.9" opacity="0.12" />
-                    </svg>
-                </div>
-
-                <!-- 💎 標題「Loading...」微調為與圖片高度一致的優雅大氣字型 💎 -->
-                <p id="status-text" class="text-gray-900 font-bold tracking-wide text-sm sm:text-base mb-3 transition-opacity duration-300">Loading...</p>
-                
-                <!-- 💎 進度條軌跡顏色：羊皮紙金棕 (#8B6F3D) 💎 -->
-                <div class="loading-bar-container w-full" id="bar-container">
-                    <div class="loading-bar-progress" id="bar-progress"></div>
-                </div>
-
-                <!-- 💎 全新加入：位於 Bar 下方的動態防焦慮、舒緩安撫細節載入提示文本 💎 -->
-                <p id="reassuring-text" class="text-gray-500 text-[10px] tracking-wide mt-3 h-8 text-center px-1 transition-opacity duration-300 opacity-0"></p>
-            </div>
+    <div id="page-loader" class="active">
+        <div class="flex flex-col items-center">
+            <p class="text-[10px] font-black tracking-[0.3em] text-sky-400 uppercase">Maven</p>
+            <p id="loader-status" class="text-[10px] text-sky-800 mt-2 opacity-50">Loading cloud data...</p>
         </div>
     </div>
 
-    <!-- 💎 歡迎與驗證結果通知彈出式視窗 (Welcome Modal - High-end iOS style white glass texture) 💎 -->
-    <!-- 💎 核心修改：將 bg-black/5 改為 bg-transparent，去除遮罩背景的磨砂模糊，使後方公式 100% 清晰可見 💎 -->
-    <div id="welcome-modal" class="ios-overlay-blur fixed inset-0 z-50 flex items-center justify-center bg-transparent opacity-0 pointer-events-none">
-        <div class="ios-glass-card w-[85%] max-w-[370px] rounded-[2.2rem] p-9 text-center flex flex-col items-center space-y-6 relative">
-            
-            <!-- 狀態動態 Icon 容器 (尺寸放大以呼應更大字型) -->
-            <div id="modal-icon-container" class="w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-sm border border-black/5">
-                <!-- 動態注入 -->
-            </div>
-            
-            <div class="space-y-2 uppercase select-none">
-                <!-- 💎 標題尺寸放大為 20px 💎 -->
-                <h3 id="modal-title" class="text-[20px] font-bold tracking-[0.12em] text-[#3E2C18]">WELCOME</h3>
-                <!-- 💎 副標題尺寸放大為 10px 💎 -->
-                <p id="modal-subtext" class="text-[10px] font-semibold tracking-[0.2em] text-[#5C4A2E]/50 mt-1">Platform Notice</p>
-            </div>
-
-            <!-- 通知內文 (💎 尺寸放大為 14px / text-sm 💎) -->
-            <p id="modal-message" class="text-sm font-medium tracking-[0.08em] text-[#3E2C18] leading-relaxed px-2">
-                Loading...
-            </p>
-
-            <!-- 💎 核心修改：優化按鈕容器結構以容納雙按鈕或單按鈕排列 💎 -->
-            <div id="modal-actions" class="w-full flex flex-col items-center space-y-3">
-                <button 
-                    id="modal-primary-btn"
-                    onclick="confirmWelcomeRedirect()"
-                    class="ios-btn w-full max-w-[210px] h-12 rounded-full text-xs font-bold tracking-[0.2em] uppercase"
-                >
-                    Confirm & Enter
-                </button>
-                <button 
-                    id="modal-secondary-btn"
-                    onclick="reloginWelcome()"
-                    class="ios-btn w-full max-w-[210px] h-12 rounded-full text-xs font-bold tracking-[0.2em] uppercase hidden"
-                >
-                    Try Again
-                </button>
+    <header id="header-root">
+        <div class="logo-bar px-6" id="logo-nav-bar"> 
+            <div class="max-w-screen-2xl mx-auto flex items-center justify-between">
+                <div id="main-logo">
+                    <span class="text-4xl font-black text-sky-900 tracking-tight" style="font-family: 'Playfair Display', serif; font-weight: 700;">Maven</span>
+                </div>
+                <div class="flex items-center gap-6 text-sky-800">
+                    <i class="fas fa-search text-xl opacity-60 cursor-pointer"></i>
+                </div>
             </div>
         </div>
+    </header>
+
+    <div id="page-content">
+        <section id="hero-section" class="px-4 md:px-12 max-w-screen-2xl mx-auto mb-12">
+            <div class="hero-container-framed relative w-full h-[50vh] md:h-[60vh] bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600">
+                <img id="hero-bg" src="" class="absolute inset-0 w-full h-full object-cover filter saturate-125" onerror="this.style.display='none'">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+                
+                <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                    <h1 class="text-3xl md:text-6xl text-white mb-3 tracking-[0.15em] uppercase" style="font-family: 'Cinzel', serif; font-weight: 400;">English Learning Studio</h1>
+                    <p class="text-sky-400 text-[10px] md:text-xs font-light tracking-[0.6em] mb-10 uppercase">English in Action</p>
+                    <button onclick="scrollToContent()" class="bg-white text-black px-14 py-4 font-black rounded-full text-[10px] tracking-[0.3em] uppercase shadow-2xl hover:bg-sky-500 hover:text-white transition-all transform active:scale-95">
+                        Browse All
+                    </button>
+                </div>
+                
+                <div class="absolute bottom-6 right-6 z-20">
+                    <button onclick="loadSheetData()" class="flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-md border border-white/20 rounded-xl text-white/80 hover:text-white hover:bg-black/40 transition-all active:scale-95 group">
+                        <i class="fas fa-sync-alt text-xs group-active:animate-spin" id="sync-icon"></i>
+                        <span class="text-[10px] font-bold tracking-widest uppercase">Sync</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <main class="space-y-12 max-w-screen-2xl mx-auto px-6" id="main-content"></main>
     </div>
 
-    <!-- 💎 底部版權：低調置中 (不顯眼) 💎 -->
-    <footer class="fixed bottom-3 left-0 right-0 z-10 text-center pointer-events-none select-none">
-        <p class="text-[9px] tracking-[0.3em] text-[#5C4A2E]/35 font-medium uppercase"
-           style="font-family: 'Inter', sans-serif;">
-            &copy; PH STUDIO, ALL RIGHTS RESERVED.
-        </p>
-    </footer>
+    <!-- Fullscreen Iframe Container -->
+    <div id="iframe-container">
+        <div class="iframe-close-btn" onclick="closeIframe()"><i class="fas fa-times"></i></div>
+        <iframe id="sim-frame" src="" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <!-- Dock Navigation -->
+    <div id="dock-nav-wrapper" class="dock-wrapper">
+        <nav class="dock-nav">
+            <div class="dock-toggle-btn" onclick="toggleDock()"><i class="fas fa-chevron-down"></i></div>
+            <div class="dock-content">
+                <button onclick="scrollToTop()" class="dock-item active">
+                    <i class="fas fa-home"></i><span class="uppercase">Home</span>
+                </button>
+                <button class="dock-item">
+                    <i class="fas fa-book-open"></i><span class="uppercase">Library</span>
+                </button>
+                <button class="dock-item">
+                    <i class="fas fa-podcast"></i><span class="uppercase">Podcast</span>
+                </button>
+            </div>
+            <div class="dock-toggle-btn" onclick="toggleDock()"><i class="fas fa-chevron-down"></i></div>
+        </nav>
+    </div>
+    <div id="dock-handle" onclick="toggleDock()" class="dock-trigger-bar"></div>
 
     <script>
-        /* =====================================================================
-           ⚙️  SCRIPT INDEX
-           ─────────────────
-           • State           : formulaInterval, currentBgUrl, loadingInterval,
-                               progressVal, authResult, authErrorMessage,
-                               guardTimeoutId, reassuringInterval, _replayTimers
-           • Network         : GAS_GUARD_URL (credential check, deployed v3),
-                               TARGET_URL (post-login redirect to GitHub Pages)
-           • Background      : loadBackgroundFromSheet() reads ELEMENTS!LOGIN_BG
-           • Ambient words   : createFormula() spawns headword+POS pairs
-           • Reassuring msgs : reassuringMessages[] shown during auth wait
-           • Auth flow       : handleLogin() → startPreLaunch() → runLoadingLoop()
-                               → showWelcomeModal() → confirmWelcomeRedirect()
-           • Click replay    : replayAnimation() uses Web Animations API
-           • Error recovery  : rollbackSystem() restores UI after a failed login
-           ===================================================================== */
+        const SPREADSHEET_ID = '1AYA_MbZlR3zYxkog6ol_BBvUu1tBnU_BG_Tq6XJInX4';
+        const FETCH_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=0`;
 
-        let formulaInterval;
-        let currentBgUrl = ""; // Used to save and restore the database background image on auth failure
+        let config = { heroData: null, cards: [] };
+        const loader = document.getElementById('page-loader');
+        let lastScrollY = window.scrollY;
 
-        // 🔗 您的 Google Apps Script (GAS) Guard API 明文網址 (對接第 10 版正式端點) 🔗
-        const GAS_GUARD_URL = "https://script.google.com/macros/s/AKfycbxgQQ3CvSsWofTL1UVPre7u_1RkYDsxTB5FGV_J_I--nCwsLFMPrYCflXK2kicuUurH/exec";
-        
-        // 🔗 轉跳目標主網頁明文網址 🔗
-        const TARGET_URL = "https://phyuaaphysics.github.io/Mavenstudio/mavenhome.html";
+        // Theme Application
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
 
-        // PWA Service Worker 註冊
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('https://phyuaaphysics.github.io/phyustudio/sw.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed', err));
+        async function loadSheetData() {
+            const syncIcon = document.getElementById('sync-icon');
+            if (syncIcon) syncIcon.classList.add('animate-spin');
+            
+            try {
+                const response = await fetch(FETCH_URL);
+                const data = await response.text();
+                const rows = data.split('\n').map(row => {
+                    const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    return matches ? matches.map(m => m.replace(/^"|"$/g, '')) : [];
+                });
+
+                // Parse data from Google Sheet
+                let heroImage = '';
+                const cards = [];
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 3) continue;
+                    
+                    const [order, type, title, pic, url] = row;
+                    
+                    if (type === 'HERO' && pic) {
+                        heroImage = pic;
+                        config.heroData = { image: pic };
+                    } else if (type === 'CARD') {
+                        cards.push({
+                            order: parseInt(order) || i,
+                            title: title,
+                            image: pic,
+                            url: url
+                        });
+                    }
+                }
+
+                // Sort cards by order
+                cards.sort((a, b) => a.order - b.order);
+                config.cards = cards;
+
+                // Update hero image
+                if (heroImage) {
+                    document.getElementById('hero-bg').src = heroImage;
+                }
+
+                renderCards();
+
+                setTimeout(() => {
+                    if (syncIcon) syncIcon.classList.remove('animate-spin');
+                    loader.classList.remove('active');
+                }, 400);
+            } catch (error) {
+                console.error("Failed to load data:", error);
+                if (syncIcon) syncIcon.classList.remove('animate-spin');
+                document.getElementById('loader-status').innerText = "Failed to load. Please check your connection.";
+            }
+        }
+
+        function toggleDock() { document.getElementById('dock-nav-wrapper').classList.toggle('collapsed'); }
+
+        function openIframe(url) {
+            const container = document.getElementById('iframe-container');
+            const frame = document.getElementById('sim-frame');
+            frame.src = url;
+            container.style.display = 'block';
+            // iOS damping fade in
+            requestAnimationFrame(() => {
+                container.classList.add('active');
+            });
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeIframe() {
+            const container = document.getElementById('iframe-container');
+            const frame = document.getElementById('sim-frame');
+            // iOS damping fade out
+            container.classList.remove('active');
+            setTimeout(() => { 
+                container.style.display = 'none'; 
+                frame.src = ''; 
+            }, 400);
+            document.body.style.overflow = 'auto';
+        }
+
+        // Page Scroll Control
+        function scrollToContent() {
+            const main = document.getElementById('main-content');
+            if (main) main.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        function renderCards() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = '';
+
+            if (config.cards.length === 0) return;
+
+            const section = document.createElement('section');
+            section.id = 'cards-section';
+            
+            section.innerHTML = `
+                <h2 class="section-title uppercase tracking-widest text-xs">Learning Materials</h2>
+                <div class="grid-container grid grid-cols-2 md:grid-cols-3" id="cards-grid"></div>
+            `;
+            mainContent.appendChild(section);
+
+            const grid = document.getElementById('cards-grid');
+            config.cards.forEach(card => {
+                const div = document.createElement('div');
+                div.className = `grid-item-card flex flex-col group`;
+                div.innerHTML = `
+                    <div class="poster-card"><img src="${card.image}" class="w-full h-full object-cover"></div>
+                    <div class="card-info-row">
+                        <span class="card-name group-hover:text-sky-500 transition-colors">${card.title}</span>
+                    </div>
+                `;
+                div.onclick = () => openIframe(card.url);
+                grid.appendChild(div);
             });
         }
 
-        // 從試算表 ELEMENTS 分頁載入 LOGIN_BG 背景圖 (改用 JSONP 方式避免 Sandbox Iframe 中的 CORS 阻擋)
-        function loadBackgroundFromSheet() {
-            window.handleSheetData = function(data) {
-                try {
-                    if (data && data.table && data.table.rows) {
-                        for (let row of data.table.rows) {
-                            if (row.c && row.c.length >= 2) {
-                                const colA = row.c[0] ? String(row.c[0].v).trim() : "";
-                                const colB = row.c[1] ? String(row.c[1].v).trim() : "";
-                                if (colA === 'LOGIN_BG' && colB) {
-                                    currentBgUrl = colB; // Save background URL
-                                    document.body.style.backgroundImage = `url('${colB}')`;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.error("Failed to parse background JSONP:", e);
-                } finally {
-                    const s = document.getElementById('sheet-bg-loader');
-                    if (s) s.remove();
-                    delete window.handleSheetData;
-                }
-            };
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+            if (currentScrollY > 30) document.body.classList.add('scrolled');
+            else document.body.classList.remove('scrolled');
+            
+            lastScrollY = currentScrollY;
+        }, { passive: true });
 
-            const script = document.createElement('script');
-            script.id = 'sheet-bg-loader';
-            script.src = "https://docs.google.com/spreadsheets/d/10YR8xKXvlTu1ccDYCMbxYOYjJGW-GxgGfvRpxEOtmYE/gviz/tq?tqx=responseHandler:handleSheetData&sheet=ELEMENTS";
-            script.onerror = function() {
-                console.error("Failed to load background JSONP, keeping default background");
-                const s = document.getElementById('sheet-bg-loader');
-                if (s) s.remove();
-                delete window.handleSheetData;
-            };
-            document.head.appendChild(script);
-        }
-
-        // 頁面加載時啟動背景公式與試算表背景圖片讀取
-        window.addEventListener('DOMContentLoaded', () => {
-            formulaInterval = setInterval(() => createFormula(), 250);
-            loadBackgroundFromSheet();
-
-            // 💎 核心修改：當頁面重新加載時，自動解析網址帶來的錯誤參數並精準顯示 💎
-            const urlParams = new URLSearchParams(window.location.search);
-            const errParam = urlParams.get('error');
-            if (errParam) {
-                const errorMsg = document.getElementById('error-msg');
-                if (errorMsg) {
-                    errorMsg.innerText = decodeURIComponent(errParam);
-                    errorMsg.style.opacity = '1';
-                }
-                // 清除網址列中的 error 參數，保持使用者介面清爽美觀
-                window.history.replaceState({}, document.title, window.location.pathname);
+        // Listen for localStorage changes for theme sync
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') {
+                applyTheme(e.newValue);
             }
         });
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        
-        const physicsFormulas = [
-            "v = u + at", "s = ut + ½at²", "v² = u² + 2as", "F = ma", "p = mv",
-            "E = mc²", "W = Fs cos θ", "P = IV", "V = IR", "Q = mc∆T",
-            "f = 1/T", "v = fλ", "n = c/v", "F = G m₁m₂/r²", "E = hf",
-            "L = mvr", "a = v²/r", "T = 2π√(l/g)", "pV = nRT", "λ = h/p",
-            "n₁sinθ₁ = n₂sinθ₂", "1/u + 1/v = 1/f", "∆p = F∆t", "E = ½mv²",
-            "τ = Fr sinθ", "φ = BA cosθ", "ε = -N(∆φ/∆t)"
-        ];
-
-        // 💎 字典字彙資料庫（單字 + 詞性），用於背景飄移浮動排版 💎
-        const dictionaryWords = [
-            { word: "institution", pos: "noun" },
-            { word: "explore",     pos: "verb" },
-            { word: "eloquent",    pos: "adjective" },
-            { word: "wisdom",      pos: "noun" },
-            { word: "persevere",   pos: "verb" },
-            { word: "meticulous",  pos: "adjective" },
-            { word: "comprehend",  pos: "verb" },
-            { word: "nuance",      pos: "noun" },
-            { word: "profound",    pos: "adjective" },
-            { word: "elucidate",   pos: "verb" },
-            { word: "diligent",    pos: "adjective" },
-            { word: "perceive",    pos: "verb" },
-            { word: "subtle",      pos: "adjective" },
-            { word: "ascertain",   pos: "verb" },
-            { word: "facet",       pos: "noun" },
-            { word: "iterate",     pos: "verb" },
-            { word: "impetus",     pos: "noun" },
-            { word: "synthesis",   pos: "noun" },
-            { word: "sagacious",   pos: "adjective" },
-            { word: "augment",     pos: "verb" },
-            { word: "journey",     pos: "noun" },
-            { word: "convey",      pos: "verb" },
-            { word: "discover",    pos: "verb" },
-            { word: "enlighten",   pos: "verb" },
-            { word: "conscientious", pos: "adjective" },
-            { word: "articulate",  pos: "adjective" },
-            { word: "resilient",   pos: "adjective" },
-            { word: "empathy",     pos: "noun" },
-            { word: "integrity",   pos: "noun" },
-            { word: "pragmatic",   pos: "adjective" }
-        ];
-
-        // 💎 保留物理公式陣列以保持向後相容（不再用於背景，但若其他模組呼叫仍可使用） 💎
-
-        // 建立飄移字典字彙
-        function createFormula() {
-            const container = document.getElementById('formula-container');
-            if (!container) return;
-            const formula = document.createElement('div');
-            const entry = dictionaryWords[Math.floor(Math.random() * dictionaryWords.length)];
-            formula.className = 'dict-word';
-            // 字典排版：headword（粗體襯線）+ 詞性（斜體小字）
-            formula.innerHTML = `<span class="dict-headword">${entry.word}</span><span class="dict-pos">${entry.pos}</span>`;
-            const isMobile = window.innerWidth < 768;
-            const padding = isMobile ? 15 : 5;
-            const x = Math.random() * (100 - padding * 2) + padding;
-            const y = Math.random() * (100 - padding * 2) + padding;
-            const size = Math.random() * (isMobile ? 12 : 16) + (isMobile ? 22 : 28);
-            const duration = Math.random() * 1.8 + 2.6;
-            formula.style.left = `${x}%`;
-            formula.style.top = `${y}%`;
-            formula.style.fontSize = `${size}px`;
-            formula.style.animation = `formulaFade ${duration}s cubic-bezier(0.4, 0, 0.2, 1) forwards`;
-            container.appendChild(formula);
-            setTimeout(() => formula.remove(), duration * 1000);
-        }
-
-        // 滑鼠懸停音效
-        function playHoverSound() {
-            if (audioCtx.state === 'suspended') return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-        }
-
-        // 載入提示音效
-        function playLoadingTick(frequency = 600) {
-            if (audioCtx.state === 'suspended') return;
-            const osc = IP = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            // 已修復：移除非法的中介變數，保證 Audio API 執行期零中斷
-            gain.gain.setValueAtTime(0.005, audioCtx.currentTime);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.03);
-        }
-
-        // 登入驗證與分流控管邏輯
-        let loadingInterval = null;
-        let progressVal = 0;
-        let authResult = null; // null = 驗證中, true = 成功, false = 失敗
-        let authErrorMessage = "";
-        let guardTimeoutId = null;
-        let reassuringInterval = null;
-
-        // 💎 Anti-anxiety loading messages (English learning theme) 💎
-        const reassuringMessages = [
-            "Initializing Maven English learning module...",
-            "Verifying credentials with the authentication server...",
-            "Establishing secure SSL channel...",
-            "Syncing student records from Google Sheets...",
-            "Loading Oxford 3000 core vocabulary database...",
-            "Loading pronunciation assets and POS tagger...",
-            "Tuning Spaced Repetition System (SRS)...",
-            "Compiling your learning progress and cache..."
-        ];
-
-        // 啟動舒緩安撫文字動態循環
-        function startReassuringMessages() {
-            const reassuringText = document.getElementById('reassuring-text');
-            if (!reassuringText) return;
-            let index = 0;
-            reassuringText.innerText = reassuringMessages[0];
-            reassuringText.style.opacity = "0.7";
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize and restore saved theme
+            const savedTheme = localStorage.getItem('theme');
+            applyTheme(savedTheme);
             
-            reassuringInterval = setInterval(() => {
-                reassuringText.style.opacity = "0";
-                setTimeout(() => {
-                    index = (index + 1) % reassuringMessages.length;
-                    reassuringText.innerText = reassuringMessages[index];
-                    reassuringText.style.opacity = "0.7";
-                }, 300);
-            }, 1500);
-        }
-
-        // 停止舒緩安撫文字動態循環
-        function stopReassuringMessages() {
-            if (reassuringInterval) {
-                clearInterval(reassuringInterval);
-            }
-            const reassuringText = document.getElementById('reassuring-text');
-            if (reassuringText) reassuringText.style.opacity = "0";
-        }
-
-        function handleLogin(event) {
-            if (event) event.preventDefault();
-            
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            const userVal = document.getElementById('username').value.trim();
-            const passVal = document.getElementById('password').value;
-            const errorMsg = document.getElementById('error-msg');
-
-            if (!userVal || !passVal) {
-                errorMsg.innerText = "Please enter your username and password";
-                errorMsg.style.opacity = '1';
-                playLoadingTick(300);
-                return;
-            }
-
-            // 初始化驗證與動畫狀態
-            authResult = null;
-            authErrorMessage = "";
-
-            // 1. 不論對錯，立刻啟動過渡畫面與公式背景，極大化降低等待焦慮
-            startPreLaunch();
-            runLoadingLoop();
-
-            // 2. 🚀【標準明文 fetch POST 連線，無縫對接第 10 版後端】🚀
-            const controller = new AbortController();
-            guardTimeoutId = setTimeout(() => {
-                controller.abort();
-                if (authResult === null) {
-                    authErrorMessage = "Connection to auth server timed out";
-                    authResult = false;
-                }
-            }, 8000); // 8-second timeout
-
-            fetch(GAS_GUARD_URL, {
-                method: "POST",
-                mode: "cors",
-                headers: {
-                    "Content-Type": "text/plain" // text/plain 可避免 OPTIONS 預檢阻擋，在各網域最不易出錯
-                },
-                body: JSON.stringify({
-                    username: userVal,
-                    password: passVal
-                }),
-                signal: controller.signal
-            })
-            .then(response => {
-                if (guardTimeoutId) clearTimeout(guardTimeoutId);
-                if (!response.ok) {
-                    throw new Error("HTTP status " + response.status);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    // 驗證成功：快取 JWT 與 Role 到本地 (💎 升級儲存至 localStorage 💎)
-                    if (data.token) localStorage.setItem('jwt_token', data.token);
-                    if (data.role) localStorage.setItem('user_role', data.role);
-                    
-                    // 💎 新增：將使用者帳密之 Username 欄位儲存至 localStorage 💎
-                    localStorage.setItem('user_username', userVal);
-                    
-                    // 💎 核心修改：將身分標籤詳細欄位全面儲存至 localStorage 💎
-                    if (data.identity_tag) {
-                        localStorage.setItem('user_class', data.identity_tag.class || "");
-                        localStorage.setItem('user_class_no', data.identity_tag.class_no || "");
-                        localStorage.setItem('user_real_name', data.identity_tag.real_name || "");
-                    } else {
-                        localStorage.setItem('user_class', "");
-                        localStorage.setItem('user_class_no', "");
-                        localStorage.setItem('user_real_name', "");
-                    }
-                    
-                    authResult = true; // 觸發進度條加速填滿
-                } else {
-                    // 驗證失敗：設定錯誤狀態 (但不回滾，準備在 100% 時觸發訪客探訪模式)
-                    authErrorMessage = data.message || "Invalid username or password";
-                    authResult = false; 
-                }
-            })
-            .catch(err => {
-                if (guardTimeoutId) clearTimeout(guardTimeoutId);
-                console.error("Failed to connect to Guard API:", err);
-                if (err.name === 'AbortError') {
-                    authErrorMessage = "Connection to auth server timed out";
-                } else {
-                    authErrorMessage = "Auth server connection error";
-                }
-                authResult = false; // 異常也直接降級切換成訪客
-            });
-        }
-
-        // 啟動前置淡出轉場畫面
-        function startPreLaunch() {
-            const landing = document.getElementById('landing-screen');
-            const formulaContainer = document.getElementById('formula-container');
-            const loadingInline = document.getElementById('loading-inline-container');
-            const statusText = document.getElementById('status-text');
-
-            // 1. 背景平滑過渡至純白
-            document.body.style.backgroundImage = "none";
-            document.body.style.backgroundColor = "#FFFFFF";
-
-            // 2. 公式保持高度飄移流動
-            formulaContainer.style.opacity = "1";
-
-            // 清除動畫干擾，確保強制進入淡出狀態
-            landing.style.animation = "none";
-            document.getElementById('item-icon-title').style.animation = "none";
-            document.getElementById('item-form').style.animation = "none";
-            document.getElementById('item-button').style.animation = "none";
-
-            // 磨砂卡片整體淡出
-            landing.style.background = "rgba(255, 255, 255, 0)";
-            landing.style.borderColor = "transparent";
-            landing.style.boxShadow = "none";
-            landing.style.backdropFilter = "none";
-            landing.style.webkitBackdropFilter = "none";
-            landing.style.transform = "translateY(-20px)";
-
-            // ICON+標題 整組同步完全淡出 (opacity: 0)
-            document.getElementById('item-icon-title').style.transform = "translateY(-40px)";
-            document.getElementById('item-icon-title').style.opacity = "0";
-
-            const itemForm = document.getElementById('item-form');
-            itemForm.style.transform = "translateY(-35px)";
-            itemForm.style.opacity = "0";
-            document.getElementById('username').disabled = true;
-            document.getElementById('password').disabled = true;
-
-            const launchBtn = document.getElementById('launch-btn');
-            launchBtn.style.transform = "translateY(-30px)";
-            launchBtn.style.opacity = "0";
-            launchBtn.style.pointerEvents = "none";
-            launchBtn.disabled = true;
-
-            document.getElementById('bar-container').style.display = 'block';
-            
-            // 💎 啟動動態語句安撫系統 💎
-            startReassuringMessages();
-        }
-
-        // 💎 動態進度條循環（成功與失敗皆會跑滿，並確保背景公式繼續正常浮動） 💎
-        function runLoadingLoop() {
-            const progress = document.getElementById('bar-progress');
-            const statusText = document.getElementById('status-text');
-            const formulaContainer = document.getElementById('formula-container');
-            const loadingInline = document.getElementById('loading-inline-container');
-            const landing = document.getElementById('landing-screen');
-
-            // 確保每次重登前置啟動時，進度條容器可視、透明度為 1 且重設寬度
-            loadingInline.classList.remove('hidden');
-            loadingInline.style.opacity = "1";
-            loadingInline.style.transform = "translateY(-40px)";
-
-            progressVal = 0;
-            const statusMessages = ["Syncing modules", "Loading assets", "Configuring workspace", "Environment check", "Optimizing core", "Finalizing"];
-            let messageIndex = 0;
-
-            if (loadingInterval) clearInterval(loadingInterval);
-
-            loadingInterval = setInterval(() => {
-                if (authResult !== null) {
-                    // 【不論驗證成敗，皆加速衝向 100% 準備導向 Welcome 視窗】
-                    progressVal += Math.random() * 8 + 6;
-                } else {
-                    // 驗證中：模擬平滑加載，但最多卡在 45%
-                    if (progressVal < 45) {
-                        progressVal += Math.random() * 2.5 + 1.0;
-                    }
-                }
-
-                if (progressVal >= 100) {
-                    progressVal = 100;
-                    progress.style.width = '100%';
-                    
-                    // 💎 核心修改：移除對 formulaContainer.style.opacity 的漸顯與隱藏控制，使其持續浮動 💎
-                    clearInterval(loadingInterval);
-                    
-                    // 💎 停止動態文字循環 💎
-                    stopReassuringMessages();
-
-                    // 隱藏進度條，為彈出式歡迎視窗創造最乾淨的白色舞台
-                    loadingInline.style.opacity = "0";
-                    loadingInline.style.transform = "translateY(-60px)";
-                    landing.style.opacity = "0";
-                    
-                    setTimeout(() => { 
-                        // 🚀 跑滿 100% 後，啟動全新的 Welcome Modal 機制 🚀
-                        showWelcomeModal();
-                    }, 600);
-                } else {
-                    progress.style.width = progressVal + '%';
-
-                    // 💎 核心修改：移除與進度條綁定的公式容器淡出，讓公式透明度穩定維持 1.0 持續顯示 💎
-                    // formulaContainer.style.opacity = (1 - (progressVal / 100)).toFixed(3);
-
-                    const targetIdx = Math.min(Math.floor((progressVal / 100) * statusMessages.length), statusMessages.length - 1);
-                    if (targetIdx !== messageIndex) {
-                        messageIndex = targetIdx;
-                        statusText.innerText = statusMessages[messageIndex];
-                        playLoadingTick(800 + (messageIndex * 50));
-                    }
-                }
-            }, 50);
-        }
-
-        // 💡 顯示歡迎/通知彈出視窗 (iOS 奢華白高透玻璃材質 + Apple 原生字型美學) 💡
-        function showWelcomeModal() {
-            const modal = document.getElementById('welcome-modal');
-            const modalCard = modal.querySelector('.ios-glass-card');
-            const modalIconContainer = document.getElementById('modal-icon-container');
-            const modalTitle = document.getElementById('modal-title');
-            const modalSubtext = document.getElementById('modal-subtext');
-            const modalMessage = document.getElementById('modal-message');
-            const primaryBtn = document.getElementById('modal-primary-btn');
-            const secondaryBtn = document.getElementById('modal-secondary-btn');
-
-            if (authResult === true) {
-                // 🟢 驗證成功分支 (💎 核心修改：由 localStorage 讀取身分標籤詳細欄位 💎)
-                const role = localStorage.getItem('user_role') || "User";
-                const realName = localStorage.getItem('user_real_name') || "";
-                const userClass = localStorage.getItem('user_class') || "";
-                const classNo = localStorage.getItem('user_class_no') || "";
-                
-                // 動態排版呈现：班級、姓名、與身分角色 (採用 Apple 原生 UI 經典對齊風格)
-                // 💎 使用打勾符號 (✓) 替代原本的盾牌，容器大小微調 💎
-                modalIconContainer.innerHTML = '✓';
-                modalIconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shadow-sm border border-[#5C7C3E]/20 bg-[#5C7C3E]/10 text-[#5C7C3E]";
-                
-                // 💎 標題改為「WELCOME」，文字大小設為放大後的 20px 💎
-                modalTitle.innerText = "WELCOME";
-                modalTitle.className = "text-[20px] font-bold tracking-[0.12em] text-[#3E2C18]"; // 羊皮紙深棕
-                modalSubtext.innerText = "ACCESS GRANTED";
-                
-                // 💎 成功時只保留一個進入按鈕 💎
-                primaryBtn.innerText = "Confirm & Enter";
-                primaryBtn.classList.remove('hidden');
-                secondaryBtn.classList.add('hidden');
-
-                // 如果後端有提供真實姓名與班級資料，就完美呈現在卡片面板上
-                if (realName) {
-                    modalMessage.innerHTML = `Access granted! Welcome to <strong>Maven</strong>.<br><br>` +
-                                             `<div class="text-left bg-[#8B6F3D]/[0.04] border border-[#8B6F3D]/15 rounded-2xl p-4 space-y-2 mt-2 mb-2 text-xs tracking-wide text-[#3E2C18]">` +
-                                             `<div>• Name: <strong>${realName}</strong></div>` +
-                                             `<div>• Class: <strong>${userClass ? userClass : "N/A"} (No. ${classNo ? classNo : "N/A"})</strong></div>` +
-                                             `</div>` +
-                                             `Role: <span class="bg-[#5C7C3E]/15 text-[#3E5C1E] px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">${role.toUpperCase()}</span>`;
-                } else {
-                    modalMessage.innerHTML = `Access granted! Welcome to <strong>Maven</strong>.<br><br>Role: <span class="bg-[#5C7C3E]/15 text-[#3E5C1E] px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">${role.toUpperCase()}</span>`;
-                }
-                playLoadingTick(1000);
-            } else {
-                // 🔴 驗證失敗/未通過分支 (強制安全切換為 Visitor 訪客身分)
-                // 💎 核心修改：在本地 localStorage 寫入訪客身分與對等資料 💎
-                localStorage.setItem('jwt_token', 'visitor-token-guest');
-                localStorage.setItem('user_role', 'guest');
-                localStorage.setItem('user_username', 'guest_visitor');
-                localStorage.setItem('user_real_name', 'Visitor');
-                localStorage.setItem('user_class', 'Visitor');
-                localStorage.setItem('user_class_no', 'N/A');
-
-                modalIconContainer.innerHTML = '👤';
-                modalIconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-sm border border-[#8B6F3D]/25 bg-[#8B6F3D]/10 text-[#8B6F3D]";
-                
-                // 💎 標題同樣使用大字型的「WELCOME」 💎
-                modalTitle.innerText = "WELCOME";
-                modalTitle.className = "text-[20px] font-bold tracking-[0.12em] text-[#5C4A2E]";
-                modalSubtext.innerText = "VISITOR ENTRANCE";
-                
-                // 💎 失敗時提供雙按鈕：繼續進入（訪客）或是重新登入 💎
-                primaryBtn.innerText = "Enter as Visitor";
-                primaryBtn.classList.remove('hidden');
-                secondaryBtn.innerText = "Try Again";
-                secondaryBtn.classList.remove('hidden');
-
-                modalMessage.innerHTML = `Identity verification failed (${authErrorMessage || "Incorrect password"}).<br><br>You may continue as a <strong>Visitor</strong> to explore the system, or return to sign in again.`;
-                playLoadingTick(400);
-            }
-
-            // 啟動 iOS 原生級 non-linear 物理阻尼轉場動畫
-            modal.classList.remove('pointer-events-none');
-            modal.classList.remove('opacity-0');
-            modal.classList.add('opacity-100');
-            modal.classList.add('active');
-            
-            modalCard.classList.remove('opacity-0');
-            modalCard.classList.add('active');
-        }
-
-        // 點擊 Modal 的確認按鈕，流暢跳轉 (iOS Damped Scale-down Out 特效)
-        function confirmWelcomeRedirect() {
-            const modal = document.getElementById('welcome-modal');
-            const modalCard = modal.querySelector('.ios-glass-card');
-            const formulaContainer = document.getElementById('formula-container');
-            
-            // 觸發高頻率微小回彈點擊音效
-            playLoadingTick(900);
-            
-            // 卡片與背景公式退場阻尼收縮及漸隱動畫
-            modalCard.style.transform = "scale(0.95)";
-            modalCard.style.opacity = "0";
-            modal.classList.remove('active');
-            modal.style.opacity = "0";
-            
-            if (formulaContainer) {
-                formulaContainer.style.transition = "opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1)";
-                formulaContainer.style.opacity = "0";
-            }
-            
-            setTimeout(() => {
-                try {
-                    window.location.href = TARGET_URL;
-                } catch (e) {
-                    console.error("Redirect failed:", e);
-                    window.location.assign(TARGET_URL);
-                }
-            }, 550);
-        }
-
-        // 💎 核心修改：點擊 Try Again 按鈕時，不進行本地重置，而是直接透過實體 URL 連結重新載入 index.html 並傳遞 error 參數 💎
-        function reloginWelcome() {
-            const modal = document.getElementById('welcome-modal');
-            const modalCard = modal.querySelector('.ios-glass-card');
-            
-            playLoadingTick(900);
-            
-            // 卡片阻尼縮小退場動畫
-            modalCard.style.transform = "scale(0.95)";
-            modalCard.style.opacity = "0";
-            modal.classList.remove('active');
-            modal.style.opacity = "0";
-            
-            setTimeout(() => {
-                modal.classList.add('pointer-events-none');
-                // 🚀 核心優化：直接透過實體 Link 重新載入，避免載入不全的問題 🚀
-                const errMsg = authErrorMessage || "Invalid username or password";
-                window.location.href = "https://phyuaaphysics.github.io/phyustudio/index.html?error=" + encodeURIComponent(errMsg);
-            }, 550);
-        }
-
-        // 💎 完美還原磨砂玻璃卡片與輸入欄位的 iOS 阻尼回滾與重置程序 (用於其他本地重設情境) 💎
-        function rollbackSystem(errorMessage) {
-            const landing = document.getElementById('landing-screen');
-            const formulaContainer = document.getElementById('formula-container');
-            const loadingInline = document.getElementById('loading-inline-container');
-            const errorMsg = document.getElementById('error-msg');
-            const launchBtn = document.getElementById('launch-btn');
-
-            // 1. 平滑還原為資料庫背景圖片與羊皮紙米色基底
-            document.body.style.backgroundColor = "#E8DCBE";
-            if (currentBgUrl) {
-                document.body.style.backgroundImage = `url('${currentBgUrl}')`;
-            }
-
-            // 2. 恢復公式飄移與容器透明度
-            if (formulaContainer) {
-                formulaContainer.style.opacity = "1";
-            }
-
-            // 3. 還原磨砂玻璃卡片本體樣式
-            landing.style.background = "rgba(255, 255, 255, 0.45)";
-            landing.style.borderColor = "rgba(255, 255, 255, 0.4)";
-            landing.style.boxShadow = "0 30px 70px rgba(0, 0, 0, 0.12)";
-            landing.style.backdropFilter = "blur(25px)";
-            landing.style.webkitBackdropFilter = "blur(25px)";
-            landing.style.transform = "translateY(0px)";
-            landing.style.opacity = "1";
-
-            // 4. 還原卡片內部的各項視差元素與功能可用狀態 (保留 username，僅清除並解鎖 password)
-            document.getElementById('item-icon-title').style.transform = "translateY(0px)";
-            document.getElementById('item-icon-title').style.opacity = "1";
-
-            const itemForm = document.getElementById('item-form');
-            itemForm.style.transform = "translateY(0px)";
-            itemForm.style.opacity = "1";
-            
-            document.getElementById('username').disabled = false;
-            document.getElementById('password').disabled = false;
-            document.getElementById('password').value = ""; // 清空密碼欄位
-
-            launchBtn.style.transform = "translateY(0px)";
-            launchBtn.style.opacity = "1";
-            launchBtn.style.pointerEvents = "auto";
-            launchBtn.disabled = false;
-            launchBtn.innerText = "Login & Browse";
-
-            // 5. 漸隱內嵌式進度條
-            loadingInline.style.opacity = "0";
-            loadingInline.style.transform = "translateY(0px)";
-            setTimeout(() => {
-                loadingInline.classList.add('hidden');
-                document.getElementById('bar-progress').style.width = "0%";
-            }, 1000);
-
-            // 6. 輸出錯誤訊息，並播放警告音效
-            if (errorMessage) {
-                errorMsg.innerText = errorMessage;
-                errorMsg.style.opacity = "1";
-            }
-            playLoadingTick(300);
-        }
-
-        // 💎 點擊 Maven 或 icon：App 慢慢淡出 → Dept 浮入 → Dept 淡出 → App 浮回（可重複觸發）💎
-        // 使用 Web Animations API 直接驅動 keyframes，避免 CSS class 衝突
-        // Replay 動畫：完全重播第一次的序列，loop 平穩 transit
-        // 結構對齊初始載入：transit（app 淡出）→ dept 浮入 → dept 淡出 → app 浮入（與 dept 淡出 overlap）
-        let _replayTimers = [];
-        function replayAnimation() {
-            const dept   = document.getElementById('dept-row');
-            const appRow = document.getElementById('app-row');
-            if (!dept || !appRow) return;
-
-            // 取消任何正在跑的動畫（CSS + Web Animations）
-            dept.getAnimations().forEach(a => a.cancel());
-            appRow.getAnimations().forEach(a => a.cancel());
-
-            // 清除殘留的 setTimeout，避免動畫疊加
-            _replayTimers.forEach(t => clearTimeout(t));
-            _replayTimers = [];
-
-            const easing = 'cubic-bezier(0.22, 1, 0.36, 1)';
-
-            // 1️⃣ 平穩 transit：App 從當前 opacity 1 慢慢淡到 0（0 → 600ms）
-            appRow.animate([
-                { opacity: 1, transform: 'translateY(0)', filter: 'blur(0)' },
-                { opacity: 0, transform: 'translateY(0)', filter: 'blur(0)' }
-            ], { duration: 600, easing, fill: 'forwards' });
-
-            // 2️⃣ Dept 浮入（700 ~ 1300ms）— 對齊初始載入 fadeRise 0.6s
-            _replayTimers.push(setTimeout(() => {
-                dept.animate([
-                    { opacity: 0, transform: 'translateY(12px)', filter: 'blur(3px)' },
-                    { opacity: 1, transform: 'translateY(0)',    filter: 'blur(0)' }
-                ], { duration: 600, easing, fill: 'forwards' });
-            }, 700));
-
-            // 3️⃣ Dept 淡出（1800 ~ 2400ms）— 對齊初始載入 fadeFall 0.6s
-            _replayTimers.push(setTimeout(() => {
-                dept.animate([
-                    { opacity: 1, transform: 'translateY(0)',     filter: 'blur(0)' },
-                    { opacity: 0, transform: 'translateY(-10px)', filter: 'blur(2px)' }
-                ], { duration: 600, easing, fill: 'forwards' });
-            }, 1800));
-
-            // 4️⃣ App 浮回（1950 ~ 2600ms）— 對齊初始載入 fadeRise 0.65s，與 dept 淡出 overlap 150ms
-            _replayTimers.push(setTimeout(() => {
-                appRow.animate([
-                    { opacity: 0, transform: 'translateY(12px)', filter: 'blur(3px)' },
-                    { opacity: 1, transform: 'translateY(0)',    filter: 'blur(0)' }
-                ], { duration: 650, easing, fill: 'forwards' });
-            }, 1950));
-        }
+            loadSheetData();
+        });
     </script>
 </body>
 </html>
