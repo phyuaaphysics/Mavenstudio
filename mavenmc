@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PH Studio - Quiz Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Noto+Sans+TC:wght@300;400;500;700&family=Shippori+Mincho:wght@700&family=Sofia+Sans:wght@700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+        }
+
+        .cinzel-title { font-family: 'Cinzel', serif; }
+        .shippori-title { font-family: 'Shippori Mincho', serif; font-weight: 700; }
+        .sofia-font { font-family: 'Sofia Sans', sans-serif; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .pill-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .pill-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+            outline: none;
+        }
+
+        .pill-input::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        .quiz-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .quiz-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(99, 102, 241, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .option-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.6);
+        }
+
+        .option-btn.selected {
+            background: rgba(99, 102, 241, 0.4);
+            border-color: #818cf8;
+        }
+
+        .option-btn.correct {
+            background: rgba(16, 185, 129, 0.4);
+            border-color: #34d399;
+        }
+
+        .option-btn.wrong {
+            background: rgba(239, 68, 68, 0.4);
+            border-color: #f87171;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #6366f1, #818cf8);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen">
+
+    <!-- Header -->
+    <header class="w-full p-4 z-10">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-indigo-500/30 flex items-center justify-center">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 text-indigo-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold shippori-title">PH Studio</h1>
+                    <p class="text-[10px] text-white/50 tracking-widest uppercase">Quiz Platform</p>
+                </div>
+            </div>
+            <div id="user-info" class="hidden flex items-center space-x-4">
+                <span id="display-name" class="text-sm text-white/80"></span>
+                <button id="logout-btn" class="w-8 h-8 rounded-full bg-white/10 hover:bg-rose-500/30 flex items-center justify-center transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 pb-8">
+
+        <!-- Login Section -->
+        <div id="login-section" class="glass-panel max-w-[400px] mx-auto mt-20 p-10 rounded-3xl text-center animate-fade-in">
+            <div class="flex justify-center mb-6">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
+                    <i data-lucide="book-open" class="w-8 h-8 text-indigo-400"></i>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 shippori-title">線上測驗系統</h2>
+            <p class="text-xs text-white/50 tracking-widest uppercase mb-8">Student Portal</p>
+
+            <form id="login-form" class="space-y-5">
+                <input type="text" id="username" required placeholder="Username"
+                    class="pill-input w-full px-6 py-4 rounded-full text-sm" />
+                <input type="password" id="password" required placeholder="Password"
+                    class="pill-input w-full px-6 py-4 rounded-full text-sm" />
+                
+                <div id="error-msg" class="hidden bg-rose-500/20 border border-rose-500/50 text-rose-300 p-3 rounded-xl text-xs">
+                    <span id="error-text"></span>
+                </div>
+
+                <button type="submit" id="submit-btn"
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-full transition shadow-lg shadow-indigo-500/30">
+                    <span>Login & Verify</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Quiz Menu Section -->
+        <div id="menu-section" class="hidden space-y-6 animate-slide-up">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold shippori-title mb-2">選擇測驗</h2>
+                <p class="text-sm text-white/60">Select a quiz to begin</p>
+            </div>
+
+            <div id="quiz-list" class="grid gap-4">
+                <!-- Quiz cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Quiz Taking Section -->
+        <div id="quiz-section" class="hidden space-y-6 animate-slide-up">
+            <!-- Quiz Header -->
+            <div class="glass-panel rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 id="quiz-title" class="text-xl font-bold shippori-title">Quiz</h2>
+                        <p id="quiz-progress" class="text-xs text-white/50">Question 1 of 10</p>
+                    </div>
+                    <button id="back-to-menu" class="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4 inline mr-1"></i> Back
+                    </button>
+                </div>
+                <div class="progress-bar h-2">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Paragraph -->
+            <div id="paragraph-card" class="glass-panel rounded-2xl p-6">
+                <h3 class="text-sm font-bold text-indigo-400 mb-3 flex items-center">
+                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Reading Passage
+                </h3>
+                <div id="paragraph-text" class="text-sm text-white/80 leading-relaxed whitespace-pre-wrap"></div>
+            </div>
+
+            <!-- Question Card -->
+            <div id="question-card" class="glass-panel rounded-2xl p-6">
+                <h3 id="question-text" class="text-lg font-medium mb-6"></h3>
+                <div id="options-container" class="space-y-3">
+                    <!-- Options will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between items-center">
+                <button id="prev-btn" class="px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 transition disabled:opacity-30" disabled>
+                    <i data-lucide="chevron-left" class="w-4 h-4 inline mr-1"></i> Previous
+                </button>
+                <button id="next-btn" class="px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 transition">
+                    Next <i data-lucide="chevron-right" class="w-4 h-4 inline ml-1"></i>
+                </button>
+                <button id="submit-quiz-btn" class="hidden px-8 py-3 rounded-full bg-emerald-600 hover:bg-emerald-500 transition font-bold">
+                    <i data-lucide="check" class="w-4 h-4 inline mr-1"></i> Submit Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden animate-slide-up">
+            <div class="glass-panel max-w-[500px] mx-auto rounded-3xl p-10 text-center">
+                <div id="result-icon" class="w-24 h-24 mx-auto rounded-full bg-indigo-500/20 flex items-center justify-center mb-6">
+                    <i data-lucide="award" class="w-12 h-12 text-indigo-400"></i>
+                </div>
+                <h2 class="text-3xl font-bold shippori-title mb-2">測驗完成!</h2>
+                <p class="text-white/60 mb-8">Quiz Completed</p>
+
+                <div class="space-y-4 mb-8">
+                    <div class="glass-panel rounded-xl p-4">
+                        <p class="text-sm text-white/50">Your Score</p>
+                        <p id="result-score" class="text-5xl font-black sofia-font text-indigo-400">0/0</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4">
+                        <p class="text-sm text-white/50">Percentage</p>
+                        <p id="result-percentage" class="text-3xl font-bold">0%</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button id="review-btn" class="w-full py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 transition font-bold">
+                        <i data-lucide="eye" class="w-4 h-4 inline mr-2"></i> Review Answers
+                    </button>
+                    <button id="back-to-menu-btn" class="w-full py-3 rounded-full bg-white/10 hover:bg-white/20 transition">
+                        <i data-lucide="list" class="w-4 h-4 inline mr-2"></i> Back to Menu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Section -->
+            <div id="review-section" class="hidden mt-6 space-y-4">
+                <!-- Review cards will be loaded here -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ============ CONFIG ============
+        const GAS_AUTH_URL = "https://script.google.com/macros/s/AKfycbxgQQ3CvSsWofTL1UVPre7u_1RkYDsxTB5FGV_J_I--nCwsLFMPrYCflXK2kicuUurH/exec";
+        const GAS_LOADER_URL = "https://script.google.com/macros/s/AKfycbyVp3CQehZT0kKc-Sn3MgQqoexsN7tZe3XlUUQtwAkn_lRfHdDPlgT5wfkvo4ypYClYkg/exec";
+
+        // ============ STATE ============
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let correctAnswers = {};
+        let quizData = null;
+
+        // ============ DOM ELEMENTS ============
+        const loginSection = document.getElementById('login-section');
+        const menuSection = document.getElementById('menu-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultsSection = document.getElementById('results-section');
+        const loginForm = document.getElementById('login-form');
+        const errorMsg = document.getElementById('error-msg');
+        const errorText = document.getElementById('error-text');
+        const submitBtn = document.getElementById('submit-btn');
+        const userInfo = document.getElementById('user-info');
+        const displayName = document.getElementById('display-name');
+
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            checkExistingSession();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            loginForm.addEventListener('submit', handleLogin);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('back-to-menu').addEventListener('click', showMenuSection);
+            document.getElementById('prev-btn').addEventListener('click', showPreviousQuestion);
+            document.getElementById('next-btn').addEventListener('click', showNextQuestion);
+            document.getElementById('submit-quiz-btn').addEventListener('click', submitQuiz);
+            document.getElementById('back-to-menu-btn').addEventListener('click', () => {
+                resultsSection.classList.add('hidden');
+                showMenuSection();
+            });
+            document.getElementById('review-btn').addEventListener('click', toggleReview);
+        }
+
+        // ============ SESSION CHECK ============
+        async function checkExistingSession() {
+            const token = localStorage.getItem('jwt_token');
+            const name = localStorage.getItem('user_real_name');
+
+            if (token && name) {
+                userInfo.classList.remove('hidden');
+                displayName.textContent = name;
+                loginSection.classList.add('hidden');
+                await loadQuizMenu();
+            }
+        }
+
+        // ============ LOGIN ============
+        async function handleLogin(e) {
+            e.preventDefault();
+            errorMsg.classList.add('hidden');
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="animate-spin inline-block">⟳</span> Checking...';
+
+            try {
+                const response = await fetch(GAS_AUTH_URL, {
+                    method: "POST",
+                    mode: "cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('jwt_token', data.token || "");
+                    localStorage.setItem('user_role', data.role || "student");
+                    localStorage.setItem('user_username', username);
+
+                    if (data.identity_tag) {
+                        localStorage.setItem('user_real_name', data.identity_tag.real_name || "");
+                        localStorage.setItem('user_class', data.identity_tag.class || "");
+                        localStorage.setItem('user_class_no', data.identity_tag.class_no || "");
+                    }
+
+                    userInfo.classList.remove('hidden');
+                    displayName.textContent = localStorage.getItem('user_real_name');
+                    loginSection.classList.add('hidden');
+                    await loadQuizMenu();
+                } else {
+                    showError(data.message || "Login failed");
+                }
+            } catch (err) {
+                showError("Connection error. Please try again.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Login & Verify</span>';
+            }
+        }
+
+        function handleLogout() {
+            localStorage.clear();
+            userInfo.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+            menuSection.classList.add('hidden');
+            quizSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            loginForm.reset();
+        }
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorMsg.classList.remove('hidden');
+        }
+
+        // ============ QUIZ MENU ============
+        async function loadQuizMenu() {
+            const token = localStorage.getItem('jwt_token');
+            const quizList = document.getElementById('quiz-list');
+
+            quizList.innerHTML = `
+                <div class="text-center py-8 text-white/50">
+                    <span class="animate-spin inline-block">⟳</span> Loading quizzes...
+                </div>
+            `;
+            menuSection.classList.remove('hidden');
+
+            try {
+                const response = await fetch(`${GAS_LOADER_URL}?action=getMenu&token=${encodeURIComponent(token)}`);
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    renderQuizMenu(data.menu);
+                } else if (data.requireLogin) {
+                    handleLogout();
+                } else {
+                    quizList.innerHTML = `<div class="text-center py-8 text-rose-400">${data.msg || 'Failed to load quizzes'}</div>`;
+                }
+            } catch (err) {
+                quizList.innerHTML = `<div class="text-center py-8 text-rose-400">Connection error</div>`;
+            }
+        }
+
+        function renderQuizMenu(menuData) {
+            const quizList = document.getElementById('quiz-list');
+            quizList.innerHTML = '';
+
+            if (!menuData || menuData.length <= 1) {
+                quizList.innerHTML = '<div class="text-center py-8 text-white/50">No quizzes available</div>';
+                return;
+            }
+
+            // Skip header row (index 0)
+            for (let i = 1; i < menuData.length; i++) {
+                const row = menuData[i];
+                const quizId = String(row[0] || '').trim();
+                const year = String(row[1] || '').trim();
+
+                if (!quizId) continue;
+
+                const card = document.createElement('div');
+                card.className = 'quiz-card rounded-2xl p-6 cursor-pointer';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+                                <i data-lucide="file-question" class="w-7 h-7 text-indigo-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold">${quizId}</h3>
+                                <p class="text-sm text-white/50">${year ? 'Year: ' + year : 'Reading Quiz'}</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-white/30"></i>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => startQuiz(quizId));
+                quizList.appendChild(card);
+            }
+
+            lucide.createIcons();
+        }
+
+        // ============ QUIZ LOADING ============
+        async function startQuiz(quizId) {
+            const token = localStorage.getItem('jwt_token');
+
+            menuSection.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+            
+            // Force DOM update
+            await new Promise(r => setTimeout(r, 50));
+            
+            document.getElementById('quiz-title').textContent = quizId;
+            document.getElementById('question-card').innerHTML = '<div class="text-center py-8 text-white/50"><span class="animate-spin inline-block">⟳</span> Loading questions...</div>';
+
+            try {
+                const response = await fetch(`${GAS_LOADER_URL}?action=getQuiz&token=${encodeURIComponent(token)}&quizId=${encodeURIComponent(quizId)}`);
+                const data = await response.json();
+
+                if (data.result === 'success') {
+                    quizData = data;
+                    currentQuiz = quizId;
+                    currentQuestionIndex = 0;
+                    userAnswers = {};
+                    correctAnswers = {};
+
+                    // Store correct answers
+                    data.questions.forEach(q => {
+                        correctAnswers[q.no] = q.answer;
+                    });
+
+                    // Show paragraph using innerHTML instead
+                    const paraEl = document.getElementById('paragraph-text');
+                    if (paraEl) {
+                        paraEl.innerHTML = (data.paragraph || "No reading passage provided.").replace(/\n/g, '<br>');
+                    }
+
+                    // Check if questions exist
+                    if (!data.questions || data.questions.length === 0) {
+                        alert('No questions found for this quiz.');
+                        showMenuSection();
+                        return;
+                    }
+
+                    renderQuestion();
+                } else {
+                    alert('Failed to load quiz: ' + (data.msg || data.message || 'Unknown error'));
+                    showMenuSection();
+                }
+            } catch (err) {
+                console.error('Quiz load error:', err);
+                alert('Error loading quiz: ' + err.message);
+                showMenuSection();
+            }
+        }
+
+        // ============ QUESTION RENDERING ============
+        function renderQuestion() {
+            const questions = quizData.questions;
+            const total = questions.length;
+
+            if (currentQuestionIndex >= total) {
+                showSubmitButton();
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            const questionNum = q.no;
+
+            // Update progress
+            document.getElementById('quiz-progress').textContent = `Question ${currentQuestionIndex + 1} of ${total}`;
+            document.getElementById('progress-fill').style.width = `${((currentQuestionIndex) / total) * 100}%`;
+
+            // Update question
+            document.getElementById('question-text').textContent = `${questionNum}. ${q.question}`;
+
+            // Render options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const options = [
+                { key: 'A', text: q.optionA },
+                { key: 'B', text: q.optionB },
+                { key: 'C', text: q.optionC },
+                { key: 'D', text: q.optionD }
+            ];
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full text-left px-5 py-4 rounded-xl flex items-center space-x-4 ${userAnswers[questionNum] === opt.key ? 'selected' : ''}`;
+                btn.innerHTML = `
+                    <span class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm">${opt.key}</span>
+                    <span class="flex-1">${opt.text}</span>
+                `;
+                btn.addEventListener('click', () => selectOption(questionNum, opt.key));
+                optionsContainer.appendChild(btn);
+            });
+
+            // Update nav buttons
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+            document.getElementById('submit-quiz-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function selectOption(questionNo, answer) {
+            userAnswers[questionNo] = answer;
+
+            // Update UI
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.querySelector('span:first-child').textContent === answer) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function showPreviousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function showNextQuestion() {
+            const questions = quizData.questions;
+            const q = questions[currentQuestionIndex];
+
+            if (!userAnswers[q.no]) {
+                alert('Please select an answer before proceeding.');
+                return;
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showSubmitButton();
+            }
+        }
+
+        function showSubmitButton() {
+            document.getElementById('progress-fill').style.width = '100%';
+            document.getElementById('quiz-progress').textContent = `Question ${quizData.questions.length} of ${quizData.questions.length}`;
+            document.getElementById('next-btn').classList.add('hidden');
+            document.getElementById('submit-quiz-btn').classList.remove('hidden');
+        }
+
+        // ============ SUBMIT QUIZ ============
+        async function submitQuiz() {
+            const token = localStorage.getItem('jwt_token');
+            const btn = document.getElementById('submit-quiz-btn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin inline-block">⟳</span> Submitting...';
+
+            try {
+                // Calculate score
+                let score = 0;
+                const total = quizData.questions.length;
+
+                quizData.questions.forEach(q => {
+                    if (userAnswers[q.no] === q.answer) {
+                        score++;
+                    }
+                });
+
+                const percentage = Math.round((score / total) * 100);
+
+                // Submit to server
+                const response = await fetch(GAS_LOADER_URL, {
+                    method: "POST",
+                    mode: "cors",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: "submitQuiz",
+                        token: token,
+                        quizId: currentQuiz,
+                        answers: userAnswers,
+                        score: score,
+                        total: total
+                    })
+                });
+
+                const data = await response.json();
+
+                // Show results
+                quizSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+
+                document.getElementById('result-score').textContent = `${score}/${total}`;
+                document.getElementById('result-percentage').textContent = `${percentage}%`;
+
+                // Update icon based on score
+                const resultIcon = document.getElementById('result-icon');
+                if (percentage >= 80) {
+                    resultIcon.className = 'w-24 h-24 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center mb-6';
+                    resultIcon.innerHTML = '<i data-lucide="trophy" class="w-12 h-12 text-emerald-400"></i>';
+                } else if (percentage >= 60) {
+                    resultIcon.className = 'w-24 h-24 mx-auto rounded-full bg-yellow-500/20 flex items-center justify-center mb-6';
+                    resultIcon.innerHTML = '<i data-lucide="thumbs-up" class="w-12 h-12 text-yellow-400"></i>';
+                } else {
+                    resultIcon.className = 'w-24 h-24 mx-auto rounded-full bg-rose-500/20 flex items-center justify-center mb-6';
+                    resultIcon.innerHTML = '<i data-lucide="refresh-cw" class="w-12 h-12 text-rose-400"></i>';
+                }
+
+                lucide.createIcons();
+                renderReview();
+
+            } catch (err) {
+                alert('Submission error. Your answers have been saved locally.');
+                quizSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+            }
+        }
+
+        // ============ REVIEW ============
+        function toggleReview() {
+            const reviewSection = document.getElementById('review-section');
+            reviewSection.classList.toggle('hidden');
+        }
+
+        function renderReview() {
+            const reviewSection = document.getElementById('review-section');
+            reviewSection.innerHTML = '<h3 class="text-lg font-bold mb-4">Answer Review</h3>';
+
+            quizData.questions.forEach(q => {
+                const userAnswer = userAnswers[q.no] || '-';
+                const isCorrect = userAnswer === q.answer;
+
+                const card = document.createElement('div');
+                card.className = `glass-panel rounded-xl p-5 mb-3 ${isCorrect ? 'border-emerald-500/30' : 'border-rose-500/30'}`;
+                card.innerHTML = `
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 rounded-full ${isCorrect ? 'bg-emerald-500/30' : 'bg-rose-500/30'} flex items-center justify-center shrink-0">
+                            <i data-lucide="${isCorrect ? 'check' : 'x'}" class="w-4 h-4 ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium mb-2">${q.no}. ${q.question}</p>
+                            <p class="text-sm">
+                                <span class="text-white/50">Your answer: </span>
+                                <span class="${isCorrect ? 'text-emerald-400' : 'text-rose-400'}">${userAnswer}</span>
+                                ${!isCorrect ? `<span class="text-white/50"> (Correct: <span class="text-emerald-400">${q.answer}</span>)</span>` : ''}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                reviewSection.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // ============ NAVIGATION ============
+        function showMenuSection() {
+            quizSection.classList.add('hidden');
+            resultsSection.classList.add('hidden');
+            document.getElementById('review-section').classList.add('hidden');
+            menuSection.classList.remove('hidden');
+            loadQuizMenu();
+        }
+    </script>
+</body>
+</html>
