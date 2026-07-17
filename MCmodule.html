@@ -454,6 +454,10 @@
 
             menuSection.classList.add('hidden');
             quizSection.classList.remove('hidden');
+            
+            // Force DOM update
+            await new Promise(r => setTimeout(r, 50));
+            
             document.getElementById('quiz-title').textContent = quizId;
             document.getElementById('question-card').innerHTML = '<div class="text-center py-8 text-white/50"><span class="animate-spin inline-block">⟳</span> Loading questions...</div>';
 
@@ -473,10 +477,10 @@
                         correctAnswers[q.no] = q.answer;
                     });
 
-                    // Show paragraph
+                    // Show paragraph using innerHTML instead
                     const paraEl = document.getElementById('paragraph-text');
                     if (paraEl) {
-                        paraEl.textContent = data.paragraph || "No reading passage provided.";
+                        paraEl.innerHTML = (data.paragraph || "No reading passage provided.").replace(/\n/g, '<br>');
                     }
 
                     // Check if questions exist
