@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Maven - English Learning</title>
+    
+    <!-- iOS PWA Status Bar Fix -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
+        
+        :root {
+            --mint-deep: #0c4a6e;
+            --mint-primary: #0ea5e9; 
+            --mint-accent: #38bdf8;
+            --mint-bg: #f0f9ff;
+            --mint-glass: rgba(240, 249, 255, 0.85); 
+            --mint-nav-glass: rgba(255, 255, 255, 0.75);
+            --sage-deep: #1e3a5f;
+            --sage-muted: #64748b;
+            --sage-active: #0284c7;
+        }
+
+        html { 
+            scroll-behavior: smooth; 
+            height: 100%;
+            overflow: hidden; 
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--mint-bg);
+            color: var(--mint-deep);
+            -webkit-tap-highlight-color: transparent;
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 0;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        #page-loader {
+            position: fixed; inset: 0; background-color: var(--mint-bg); z-index: 1000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        #page-loader.active { opacity: 1; visibility: visible; }
+        
+        .logo-bar {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            z-index: 120;
+            background-color: rgba(240, 249, 255, 0.85);
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(14, 165, 233, 0.1);
+            padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
+            padding-bottom: 12px;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #main-logo {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: left center;
+            will-change: transform;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .scrolled #main-logo { transform: scale(0.75); }
+
+        #page-content { padding-top: calc(env(safe-area-inset-top, 0px) + 85px); }
+
+        /* Grid Layout */
+        .grid-container {
+            display: grid;
+            gap: 20px;
+            padding: 10px 0 40px 0;
+            width: 100%;
+        }
+
+        .poster-card { 
+            aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #bae6fd; 
+            position: relative; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; 
+            border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 12px -4px rgba(12, 74, 110, 0.1);
+        }
+        
+        .poster-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(12, 74, 110, 0.2); }
+
+        .card-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .card-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--mint-deep);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+            padding: 4px 10px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hero-container-framed {
+            border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px;
+            overflow: hidden; position: relative; background-color: #000; 
+        }
+
+        .section-hidden { display: none !important; }
+
+        #iframe-container {
+            position: fixed; inset: 0; z-index: 400;
+            background: black; display: none;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #iframe-container.active { 
+            display: block;
+            opacity: 1;
+        }
+        
+        .iframe-close-btn {
+            position: absolute; top: calc(env(safe-area-inset-top, 0px) + 15px);
+            right: 20px; z-index: 410;
+            width: 40px; height: 40px; background: rgba(0,0,0,0.4);
+            color: white; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 20px;
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .iframe-close-btn:hover {
+            background: rgba(0,0,0,0.6);
+            transform: scale(1.1);
+        }
+
+        .dock-wrapper {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 200;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s;
+            width: auto;
+            min-width: 280px;
+        }
+
+        .dock-wrapper.collapsed { transform: translateX(-50%) translateY(200px); opacity: 0; }
+
+        .dock-nav {
+            background-color: rgba(30, 58, 95, 0.85); 
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1.5px solid rgba(14, 165, 233, 0.3);
+            padding: 12px 14px;
+            border-radius: 42px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex; align-items: center; justify-content: center; gap: 14px;
+        }
+
+        .dock-toggle-btn {
+            width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            color: rgba(255,255,255,0.4); cursor: pointer; font-size: 14px;
+        }
+
+        .dock-content { display: flex; align-items: center; gap: 14px; }
+
+        .dock-item {
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            color: var(--sage-muted); transition: all 0.3s; min-width: 58px;
+            background: transparent; border: none; cursor: pointer;
+        }
+
+        .dock-item i { font-size: 1.6rem; }
+        .dock-item span { font-size: 9px; font-weight: 500; opacity: 0.7; }
+        .dock-item.active { color: white; }
+
+        .dock-trigger-bar {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px; height: 5px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px; z-index: 199; cursor: pointer; display: none;
+        }
+        .dock-wrapper.collapsed + .dock-trigger-bar { display: block; }
+
+        .section-title { font-size: 1.15rem; font-weight: 800; color: var(--mint-deep); margin-bottom: 16px; border-left: 4px solid var(--mint-primary); padding-left: 12px; }
+
+        @media (max-width: 768px) {
+            .hero-container-framed { border-radius: 0; }
+            .dock-wrapper { width: 92%; max-width: 400px; }
+            #page-content { padding-top: calc(env(safe-area-inset-top, 0px) + 115px); }
+        }
+
+        /* ================= Day/Night UI Core Animation ================= */
+
+        body {
+            transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        color 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                        opacity 0.4s ease;
+        }
+
+        body {
+            background-color: var(--mint-bg);
+            color: var(--mint-deep);
+        }
+
+        body.dark-mode {
+            --mint-deep: #f0f9ff;
+            --mint-primary: #38bdf8;
+            --mint-accent: #0ea5e9;
+            --mint-bg: #0c1222;
+            --mint-glass: rgba(12, 18, 34, 0.85);
+            --mint-nav-glass: rgba(12, 18, 34, 0.75);
+            --sage-deep: #e2e8f0;
+            --sage-muted: #94a3b8;
+            --sage-active: #38bdf8;
+            
+            background-color: var(--mint-bg);
+            color: var(--mint-deep);
+        }
+
+        /* Dark Mode UI Elements */
+        body.dark-mode .logo-bar {
+            background-color: rgba(12, 18, 34, 0.85);
+            border-bottom-color: rgba(56, 189, 248, 0.1);
+        }
+        body.dark-mode #main-logo span {
+            color: #38bdf8;
+        }
+        body.dark-mode .poster-card {
+            background: #112233;
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        body.dark-mode .card-name {
+            background: rgba(17, 34, 51, 0.6);
+            border-color: rgba(56, 189, 248, 0.1);
+            color: #e2e8f0;
+        }
+        body.dark-mode #main-content h2.section-title {
+            color: #38bdf8;
+            border-left-color: #38bdf8;
+        }
+    </style>
+</head>
+<body class="pb-40 hide-scrollbar">
+
+    <div id="page-loader" class="active">
+        <div class="flex flex-col items-center">
+            <img src="https://i.ibb.co/zVgbyJvd/appeng.jpg" class="w-12 h-12 animate-pulse mb-4">
+            <p class="text-[10px] font-black tracking-[0.3em] text-sky-400 uppercase">Maven</p>
+            <p id="loader-status" class="text-[10px] text-sky-800 mt-2 opacity-50">Loading cloud data...</p>
+        </div>
+    </div>
+
+    <header id="header-root">
+        <div class="logo-bar px-6" id="logo-nav-bar"> 
+            <div class="max-w-screen-2xl mx-auto flex items-center justify-between">
+                <div id="main-logo">
+                    <img src="https://i.ibb.co/zVgbyJvd/appeng.jpg" alt="Maven" class="h-12 w-auto">
+                    <span class="text-xl font-black text-sky-900 tracking-tighter" style="font-family: 'Playfair Display', serif; font-weight: 700;">Maven</span>
+                </div>
+                <div class="flex items-center gap-6 text-sky-800">
+                    <i class="fas fa-search text-xl opacity-60 cursor-pointer"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="page-content">
+        <section id="hero-section" class="px-4 md:px-12 max-w-screen-2xl mx-auto mb-12">
+            <div class="hero-container-framed relative w-full h-[50vh] md:h-[60vh]">
+                <img id="hero-bg" src="" class="absolute inset-0 w-full h-full object-cover filter saturate-125">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent"></div>
+                
+                <div class="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+                    <h1 class="text-3xl md:text-6xl text-white mb-3 tracking-[0.15em] uppercase" style="font-family: 'Cinzel', serif; font-weight: 400;">English Learning Studio</h1>
+                    <p class="text-sky-400 text-[10px] md:text-xs font-light tracking-[0.6em] mb-10 uppercase">English in Action</p>
+                    <button onclick="scrollToContent()" class="bg-white text-black px-14 py-4 font-black rounded-full text-[10px] tracking-[0.3em] uppercase shadow-2xl hover:bg-sky-500 hover:text-white transition-all transform active:scale-95">
+                        Browse All
+                    </button>
+                </div>
+                
+                <div class="absolute bottom-6 right-6 z-20">
+                    <button onclick="loadSheetData()" class="flex items-center gap-2 px-4 py-2 bg-black/30 backdrop-blur-md border border-white/20 rounded-xl text-white/80 hover:text-white hover:bg-black/40 transition-all active:scale-95 group">
+                        <i class="fas fa-sync-alt text-xs group-active:animate-spin" id="sync-icon"></i>
+                        <span class="text-[10px] font-bold tracking-widest uppercase">Sync</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <main class="space-y-12 max-w-screen-2xl mx-auto px-6" id="main-content"></main>
+    </div>
+
+    <!-- Fullscreen Iframe Container -->
+    <div id="iframe-container">
+        <div class="iframe-close-btn" onclick="closeIframe()"><i class="fas fa-times"></i></div>
+        <iframe id="sim-frame" src="" class="w-full h-full border-none"></iframe>
+    </div>
+
+    <!-- Dock Navigation -->
+    <div id="dock-nav-wrapper" class="dock-wrapper">
+        <nav class="dock-nav">
+            <div class="dock-toggle-btn" onclick="toggleDock()"><i class="fas fa-chevron-down"></i></div>
+            <div class="dock-content">
+                <button onclick="scrollToTop()" class="dock-item active">
+                    <i class="fas fa-home"></i><span class="uppercase">Home</span>
+                </button>
+                <button class="dock-item">
+                    <i class="fas fa-book-open"></i><span class="uppercase">Library</span>
+                </button>
+                <button class="dock-item">
+                    <i class="fas fa-podcast"></i><span class="uppercase">Podcast</span>
+                </button>
+            </div>
+            <div class="dock-toggle-btn" onclick="toggleDock()"><i class="fas fa-chevron-down"></i></div>
+        </nav>
+    </div>
+    <div id="dock-handle" onclick="toggleDock()" class="dock-trigger-bar"></div>
+
+    <script>
+        const SPREADSHEET_ID = '1AYA_MbZlR3zYxkog6ol_BBvUu1tBnU_BG_Tq6XJInX4';
+        const FETCH_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=0`;
+
+        let config = { heroData: null, cards: [] };
+        const loader = document.getElementById('page-loader');
+        let lastScrollY = window.scrollY;
+
+        // Theme Application
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        }
+
+        async function loadSheetData() {
+            const syncIcon = document.getElementById('sync-icon');
+            if (syncIcon) syncIcon.classList.add('animate-spin');
+            
+            try {
+                const response = await fetch(FETCH_URL);
+                const data = await response.text();
+                const rows = data.split('\n').map(row => {
+                    const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    return matches ? matches.map(m => m.replace(/^"|"$/g, '')) : [];
+                });
+
+                // Parse data from Google Sheet
+                let heroImage = '';
+                const cards = [];
+
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 3) continue;
+                    
+                    const [order, type, title, pic, url] = row;
+                    
+                    if (type === 'HERO' && pic) {
+                        heroImage = pic;
+                        config.heroData = { image: pic };
+                    } else if (type === 'CARD') {
+                        cards.push({
+                            order: parseInt(order) || i,
+                            title: title,
+                            image: pic,
+                            url: url
+                        });
+                    }
+                }
+
+                // Sort cards by order
+                cards.sort((a, b) => a.order - b.order);
+                config.cards = cards;
+
+                // Update hero image
+                if (heroImage) {
+                    document.getElementById('hero-bg').src = heroImage;
+                }
+
+                renderCards();
+
+                setTimeout(() => {
+                    if (syncIcon) syncIcon.classList.remove('animate-spin');
+                    loader.classList.remove('active');
+                }, 400);
+            } catch (error) {
+                console.error("Failed to load data:", error);
+                if (syncIcon) syncIcon.classList.remove('animate-spin');
+                document.getElementById('loader-status').innerText = "Failed to load. Please check your connection.";
+            }
+        }
+
+        function toggleDock() { document.getElementById('dock-nav-wrapper').classList.toggle('collapsed'); }
+
+        function openIframe(url) {
+            const container = document.getElementById('iframe-container');
+            const frame = document.getElementById('sim-frame');
+            frame.src = url;
+            container.style.display = 'block';
+            // iOS damping fade in
+            requestAnimationFrame(() => {
+                container.classList.add('active');
+            });
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeIframe() {
+            const container = document.getElementById('iframe-container');
+            const frame = document.getElementById('sim-frame');
+            // iOS damping fade out
+            container.classList.remove('active');
+            setTimeout(() => { 
+                container.style.display = 'none'; 
+                frame.src = ''; 
+            }, 400);
+            document.body.style.overflow = 'auto';
+        }
+
+        // Page Scroll Control
+        function scrollToContent() {
+            const main = document.getElementById('main-content');
+            if (main) main.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        function renderCards() {
+            const mainContent = document.getElementById('main-content');
+            mainContent.innerHTML = '';
+
+            if (config.cards.length === 0) return;
+
+            const section = document.createElement('section');
+            section.id = 'cards-section';
+            
+            section.innerHTML = `
+                <h2 class="section-title uppercase tracking-widest text-xs">Learning Materials</h2>
+                <div class="grid-container grid grid-cols-2 md:grid-cols-3" id="cards-grid"></div>
+            `;
+            mainContent.appendChild(section);
+
+            const grid = document.getElementById('cards-grid');
+            config.cards.forEach(card => {
+                const div = document.createElement('div');
+                div.className = `grid-item-card flex flex-col group`;
+                div.innerHTML = `
+                    <div class="poster-card"><img src="${card.image}" class="w-full h-full object-cover"></div>
+                    <div class="card-info-row">
+                        <span class="card-name group-hover:text-sky-500 transition-colors">${card.title}</span>
+                    </div>
+                `;
+                div.onclick = () => openIframe(card.url);
+                grid.appendChild(div);
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY || document.documentElement.scrollTop;
+            if (currentScrollY > 30) document.body.classList.add('scrolled');
+            else document.body.classList.remove('scrolled');
+            
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+
+        // Listen for localStorage changes for theme sync
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') {
+                applyTheme(e.newValue);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize and restore saved theme
+            const savedTheme = localStorage.getItem('theme');
+            applyTheme(savedTheme);
+            
+            loadSheetData();
+        });
+    </script>
+</body>
+</html>
