@@ -474,7 +474,17 @@
                     });
 
                     // Show paragraph
-                    document.getElementById('paragraph-text').textContent = data.paragraph || "No reading passage provided.";
+                    const paraEl = document.getElementById('paragraph-text');
+                    if (paraEl) {
+                        paraEl.textContent = data.paragraph || "No reading passage provided.";
+                    }
+
+                    // Check if questions exist
+                    if (!data.questions || data.questions.length === 0) {
+                        alert('No questions found for this quiz.');
+                        showMenuSection();
+                        return;
+                    }
 
                     renderQuestion();
                 } else {
@@ -482,7 +492,8 @@
                     showMenuSection();
                 }
             } catch (err) {
-                alert('Connection error: ' + err.message);
+                console.error('Quiz load error:', err);
+                alert('Error loading quiz: ' + err.message);
                 showMenuSection();
             }
         }
