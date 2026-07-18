@@ -13,14 +13,14 @@
     ║                                                                          ║
     ║  🎨 COLOR PALETTE                                                        ║
     ║  ────────────────                                                        ║
-    ║  Background default : #E8DCBE   warm parchment cream                     ║
-    ║  Glass card          : rgba(252,246,230,0.55)  + blur(25px)             ║
-    ║  Card border         : rgba(139,111,61,0.30)   sepia hairline            ║
-    ║  Primary text        : #3E2C18   deep brown                              ║
-    ║  Secondary text      : #5C4A2E   medium brown                            ║
-    ║  Accent / brand      : #8B6F3D   antique gold                            ║
-    ║  Success accent      : #5C7C3E   olive green                             ║
-    ║  Loading / progress  : #8B6F3D   antique gold (replaces Tiffany blue)    ║
+    ║  Background default : #f0f9ff    fresh pale sky blue                     ║
+    ║  Glass card          : rgba(240,249,255,0.65)  + blur(25px)            ║
+    ║  Card border         : rgba(14,165,233,0.30)   sky blue hairline        ║
+    ║  Primary text        : #0c4a6e   deep sky blue                          ║
+    ║  Secondary text      : #64748b   slate gray                              ║
+    ║  Accent / brand      : #0ea5e9   sky blue                               ║
+    ║  Success accent      : #0ea5e9   sky blue                               ║
+    ║  Loading / progress  : #0ea5e9   sky blue                               ║
     ║                                                                          ║
     ║  🔤 TYPOGRAPHY                                                           ║
     ║  ──────────────                                                          ║
@@ -54,7 +54,7 @@
     ║  ─────────────────                                                       ║
     ║  Single-file SPA, vanilla HTML/CSS/JS (no build step).                  ║
     ║  Backend: Google Apps Script "Guard API" for credential validation.      ║
-    ║  PWA: standalone display, theme-color #8B6F3D, app icon linked.         ║
+    ║  PWA: standalone display, theme-color #0ea5e9, app icon linked.        ║
     ║  Background: optional Google Sheet ELEMENTS!LOGIN_BG override.           ║
     ║  Auth result cached in localStorage (jwt_token, user_role, identity).    ║
     ║                                                                          ║
@@ -71,7 +71,7 @@
     <link class="shortcut icon" rel="shortcut icon" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
     
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#8B6F3D">
+    <meta name="theme-color" content="#0ea5e9">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Maven">
@@ -144,7 +144,7 @@
             width: 80vw;
             max-width: 280px;
             height: 12px; /* 調整高度，與綠色膠囊 progress bar 高度契合 */
-            background: #E5E5EA; /* iOS 標準未加載灰色軌跡 */
+            background: #dbeafe; /* iOS 標準未加載灰色軌跡 */
             border-radius: 9999px;
             overflow: hidden;
             display: none;
@@ -154,18 +154,18 @@
         .loading-bar-progress {
             width: 0%;
             height: 100%;
-            background: #8B6F3D; /* 💎 羊皮紙主題：古典金棕色調 💎 */
+            background: #0ea5e9; /* 💎 天空藍主題：fresh sky blue 💎 */
             border-radius: 9999px;
             transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
             /* 羊皮紙主題：暖米色基底，後續若 Google 試算表載入 LOGIN_BG 圖片會自動覆蓋 */
-            background-color: #E8DCBE;
+            background-color: #f0f9ff;
             background-repeat: no-repeat;
             background-position: center center;
             background-size: cover;
-            color: #3E2C18;
+            color: #0c4a6e;
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             overflow: hidden;
@@ -178,13 +178,13 @@
             z-index: 10;
         }
 
-        /* 磨砂玻璃卡片樣式 - 羊皮紙主題 */
+        /* 磨砂玻璃卡片樣式 - 天空藍主題 */
         .glass-card {
-            background: rgba(252, 246, 230, 0.55);
+            background: rgba(240, 249, 255, 0.65);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(139, 111, 61, 0.3);
-            box-shadow: 0 30px 70px rgba(89, 64, 32, 0.18);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            box-shadow: 0 30px 70px rgba(12, 74, 110, 0.12);
             transition: opacity 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
                         transform 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
                         background 1.2s cubic-bezier(0.25, 1, 0.2, 1), 
@@ -198,28 +198,28 @@
             transition: transform 1.2s cubic-bezier(0.25, 1, 0.2, 1), opacity 1.0s cubic-bezier(0.25, 1, 0.2, 1);
         }
 
-        /* 藥丸型輸入框 - 羊皮紙主題 */
+        /* 藥丸型輸入框 - 天空藍主題 */
         .input-pill {
-            background: rgba(252, 246, 230, 0.92);
-            border: 1px solid rgba(139, 111, 61, 0.25);
+            background: rgba(240, 249, 255, 0.92);
+            border: 1px solid rgba(14, 165, 233, 0.25);
             transition: all 0.3s ease;
         }
         .input-pill:focus {
-            background: rgba(255, 251, 240, 0.98);
-            box-shadow: 0 4px 15px rgba(89, 64, 32, 0.08);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 15px rgba(12, 74, 110, 0.08);
         }
 
-        /* 藥丸型登入按鈕 - 羊皮紙主題 */
+        /* 藥丸型登入按鈕 - 天空藍主題 */
         .btn-pill {
-            background: rgba(232, 220, 190, 0.85);
-            border: 1px solid rgba(139, 111, 61, 0.35);
+            background: rgba(219, 234, 254, 0.85);
+            border: 1px solid rgba(14, 165, 233, 0.35);
             transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
             -webkit-tap-highlight-color: transparent;
         }
         .btn-pill:hover {
-            background: #3E2C18;
-            color: #FCF6E6;
-            box-shadow: 0 4px 15px rgba(62, 44, 24, 0.25);
+            background: #0c4a6e;
+            color: #f0f9ff;
+            box-shadow: 0 4px 15px rgba(12, 74, 110, 0.25);
         }
         .btn-pill:active {
             transform: scale(0.97);
@@ -242,7 +242,7 @@
             color: #1e293b;
             opacity: 0;
             white-space: nowrap;
-            text-shadow: 0 0 15px rgba(255,255,255,0.85);
+            text-shadow: 0 0 15px rgba(240,249,255,0.85);
             will-change: transform, opacity;
         }
 
@@ -256,13 +256,13 @@
             opacity: 0;
             white-space: nowrap;
             will-change: transform, opacity;
-            text-shadow: 0 0 18px rgba(255,255,255,0.92);
+            text-shadow: 0 0 18px rgba(240,249,255,0.92);
         }
 
         .dict-headword {
             font-family: 'Playfair Display', 'Charter', 'Times New Roman', serif;
             font-weight: 600;
-            color: #3E2C18;
+            color: #0c4a6e;
             letter-spacing: -0.005em;
             line-height: 1;
         }
@@ -271,7 +271,7 @@
             font-family: 'Playfair Display', 'Charter', 'Times New Roman', serif;
             font-style: italic;
             font-weight: 400;
-            color: #8B6F3D;
+            color: #0ea5e9;
             margin-top: 4px;
             letter-spacing: 0.01em;
             line-height: 1;
@@ -290,14 +290,14 @@
         }
 
         .ios-glass-card {
-            background: rgba(252, 246, 230, 0.78) !important;
+            background: rgba(240, 249, 255, 0.78) !important;
             backdrop-filter: blur(40px) saturate(180%) !important;
             -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
-            border: 1px solid rgba(139, 111, 61, 0.35) !important;
+            border: 1px solid rgba(14, 165, 233, 0.35) !important;
             box-shadow: 
-                0 4px 30px rgba(89, 64, 32, 0.04),
-                0 30px 70px rgba(62, 44, 24, 0.18),
-                inset 0 1px 1px rgba(255, 248, 225, 0.7) !important;
+                0 4px 30px rgba(12, 74, 110, 0.04),
+                0 30px 70px rgba(12, 74, 110, 0.12),
+                inset 0 1px 1px rgba(255, 255, 255, 0.7) !important;
             transform: scale(0.85) translateY(30px);
             opacity: 0;
             transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
@@ -311,25 +311,25 @@
             opacity: 1;
         }
 
-        /* iOS 微震動感按鈕 - 羊皮紙主題 */
+        /* iOS 微震動感按鈕 - 天空藍主題 */
         .ios-btn {
-            background: rgba(252, 246, 230, 0.95);
-            border: 1px solid rgba(139, 111, 61, 0.2);
-            box-shadow: 0 4px 15px rgba(89, 64, 32, 0.04), inset 0 1px 0 rgba(255, 251, 235, 0.95);
-            color: #3E2C18;
+            background: rgba(240, 249, 255, 0.95);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            box-shadow: 0 4px 15px rgba(12, 74, 110, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+            color: #0c4a6e;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             -webkit-tap-highlight-color: transparent;
         }
         .ios-btn:hover {
-            background: #3E2C18;
-            color: #FCF6E6;
-            box-shadow: 0 8px 25px rgba(62, 44, 24, 0.2);
+            background: #0c4a6e;
+            color: #f0f9ff;
+            box-shadow: 0 8px 25px rgba(12, 74, 110, 0.2);
             transform: translateY(-1px);
         }
         .ios-btn:active {
             transform: scale(0.96) translateY(0);
-            background: rgba(62, 44, 24, 0.92);
-            color: #FCF6E6;
+            background: rgba(12, 74, 110, 0.92);
+            color: #f0f9ff;
         }
     </style>
 </head>
@@ -345,28 +345,24 @@
         <div class="relative w-full fade-in parallax-item" id="item-icon-title" style="min-height: 120px;">
             <!-- 💎 系所抬頭：兩行設計，Geomini 字型，NING PO NO.2 COLLEGE 大於 Department of English 💎 -->
             <div id="dept-row" class="dept-lifecycle absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                <p class="text-[#3E2C18] font-bold text-2xl sm:text-3xl leading-[1.1] tracking-[0.04em]"
+                <p class="text-[#0c4a6e] font-bold text-2xl sm:text-3xl leading-[1.1] tracking-[0.04em]"
                    style="font-family: 'Geomini', 'Geomanist', 'Futura', 'Avenir Next', 'Century Gothic', 'Trebuchet MS', sans-serif; text-shadow: 0 1px 0 rgba(255,251,235,0.5);">
                     NING PO NO.2 COLLEGE
                 </p>
-                <p class="mt-2 text-[#8B6F3D] font-semibold text-sm sm:text-base leading-[1.2] tracking-[0.22em]"
+                <p class="mt-2 text-[#0ea5e9] font-semibold text-sm sm:text-base leading-[1.2] tracking-[0.22em]"
                    style="font-family: 'Geomini', 'Geomanist', 'Futura', 'Avenir Next', 'Century Gothic', 'Trebuchet MS', sans-serif;">
                     Department of English
                 </p>
             </div>
             
             <!-- 💎 App 名稱列 (icon + Maven) — 與抬頭共用 fadeRise，於同位置 crossfade 浮入，點擊觸發動畫重播 💎 -->
-            <div id="app-row" class="app-row-slide absolute inset-0 flex items-center justify-center gap-5 cursor-pointer select-none" onclick="replayAnimation()">
+            <div id="app-row" class="app-row-slide absolute inset-0 flex items-center justify-center cursor-pointer select-none" onclick="replayAnimation()">
                 <img 
-                    src="https://i.ibb.co/zVgbyJvd/appeng.jpg" 
+                    src="https://i.ibb.co/jZhPq4wS/appicon2jpg.jpg" 
                     alt="Maven Icon" 
-                    class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl shadow-lg transition-all duration-700 border border-[#8B6F3D]/20"
+                    style="max-width: 100%; height: auto; max-height: 100px; border-radius: 20px;"
                     onerror="this.src='https://via.placeholder.com/512x512?text=Maven'"
                 >
-                <h1 class="text-[#3E2C18] font-bold tracking-tight text-4xl sm:text-5xl leading-none select-none"
-                    style="font-family: 'Playfair Display', 'Cinzel', 'Times New Roman', serif;">
-                    Maven
-                </h1>
             </div>
         </div>
 
@@ -377,7 +373,7 @@
                 id="username" 
                 placeholder="USERNAME" 
                 onkeydown="if(event.key === 'Enter') handleLogin(event)"
-                class="input-pill w-full max-w-[270px] h-10 px-6 rounded-full text-[#3E2C18] placeholder-[#5C4A2E]/40 focus:outline-none text-center text-[10px] tracking-[0.25em] font-medium"
+                class="input-pill w-full max-w-[270px] h-10 px-6 rounded-full text-[#0c4a6e] placeholder-[#64748b]/40 focus:outline-none text-center text-[10px] tracking-[0.25em] font-medium"
                 autocomplete="off"
             >
             <input 
@@ -385,7 +381,7 @@
                 id="password" 
                 placeholder="PASSWORD" 
                 onkeydown="if(event.key === 'Enter') handleLogin(event)"
-                class="input-pill w-full max-w-[270px] h-10 px-6 rounded-full text-[#3E2C18] placeholder-[#5C4A2E]/40 focus:outline-none text-center text-[#3E2C18] text-center text-[10px] tracking-[0.25em] font-medium"
+                class="input-pill w-full max-w-[270px] h-10 px-6 rounded-full text-[#0c4a6e] placeholder-[#64748b]/40 focus:outline-none text-center text-[#0c4a6e] text-center text-[10px] tracking-[0.25em] font-medium"
             >
             
             <!-- 錯誤訊息提示區 -->
@@ -400,7 +396,7 @@
                 id="launch-btn"
                 onmouseenter="playHoverSound()"
                 onclick="handleLogin(event)"
-                class="btn-pill w-full max-w-[270px] h-10 rounded-full text-[#3E2C18] text-[10px] font-semibold tracking-[0.25em] uppercase transition-all duration-500"
+                class="btn-pill w-full max-w-[270px] h-10 rounded-full text-[#0c4a6e] text-[10px] font-semibold tracking-[0.25em] uppercase transition-all duration-500"
             >
                 Login & Browse
             </button>
@@ -409,9 +405,9 @@
             <!-- 💎 核心修改：移除 mt-6，改用負 margin 及置中 translateY 來把整個過渡組件向上提升，使其完全居中 💎 -->
             <div id="loading-inline-container" class="w-full max-w-[270px] -mt-10 opacity-0 transition-all duration-1000 hidden flex flex-col items-center translate-y-[-10px]">
                 
-                <!-- 💎 旋轉器顏色：羊皮紙金棕 (#8B6F3D) 💎 -->
+                <!-- 💎 旋轉器顏色：天空藍 (#0ea5e9) 💎 -->
                 <div class="relative w-12 h-12 mb-4 animate-spin">
-                    <svg class="w-full h-full text-[#8B6F3D]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <svg class="w-full h-full text-[#0ea5e9]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="2" opacity="1.0" />
                         <line x1="17" y1="7" x2="19.1" y2="4.9" opacity="0.87" />
                         <line x1="19" y1="12" x2="22" y2="12" opacity="0.75" />
@@ -426,7 +422,7 @@
                 <!-- 💎 標題「Loading...」微調為與圖片高度一致的優雅大氣字型 💎 -->
                 <p id="status-text" class="text-gray-900 font-bold tracking-wide text-sm sm:text-base mb-3 transition-opacity duration-300">Loading...</p>
                 
-                <!-- 💎 進度條軌跡顏色：羊皮紙金棕 (#8B6F3D) 💎 -->
+                <!-- 💎 進度條軌跡顏色：天空藍 (#0ea5e9) 💎 -->
                 <div class="loading-bar-container w-full" id="bar-container">
                     <div class="loading-bar-progress" id="bar-progress"></div>
                 </div>
@@ -449,13 +445,13 @@
             
             <div class="space-y-2 uppercase select-none">
                 <!-- 💎 標題尺寸放大為 20px 💎 -->
-                <h3 id="modal-title" class="text-[20px] font-bold tracking-[0.12em] text-[#3E2C18]">WELCOME</h3>
+                <h3 id="modal-title" class="text-[20px] font-bold tracking-[0.12em] text-[#0c4a6e]">WELCOME</h3>
                 <!-- 💎 副標題尺寸放大為 10px 💎 -->
-                <p id="modal-subtext" class="text-[10px] font-semibold tracking-[0.2em] text-[#5C4A2E]/50 mt-1">Platform Notice</p>
+                <p id="modal-subtext" class="text-[10px] font-semibold tracking-[0.2em] text-[#64748b]/50 mt-1">Platform Notice</p>
             </div>
 
             <!-- 通知內文 (💎 尺寸放大為 14px / text-sm 💎) -->
-            <p id="modal-message" class="text-sm font-medium tracking-[0.08em] text-[#3E2C18] leading-relaxed px-2">
+            <p id="modal-message" class="text-sm font-medium tracking-[0.08em] text-[#0c4a6e] leading-relaxed px-2">
                 Loading...
             </p>
 
@@ -481,7 +477,7 @@
 
     <!-- 💎 底部版權：低調置中 (不顯眼) 💎 -->
     <footer class="fixed bottom-3 left-0 right-0 z-10 text-center pointer-events-none select-none">
-        <p class="text-[9px] tracking-[0.3em] text-[#5C4A2E]/35 font-medium uppercase"
+        <p class="text-[9px] tracking-[0.3em] text-[#64748b]/35 font-medium uppercase"
            style="font-family: 'Inter', sans-serif;">
             &copy; PH STUDIO, ALL RIGHTS RESERVED.
         </p>
@@ -949,11 +945,11 @@
                 // 動態排版呈现：班級、姓名、與身分角色 (採用 Apple 原生 UI 經典對齊風格)
                 // 💎 使用打勾符號 (✓) 替代原本的盾牌，容器大小微調 💎
                 modalIconContainer.innerHTML = '✓';
-                modalIconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shadow-sm border border-[#5C7C3E]/20 bg-[#5C7C3E]/10 text-[#5C7C3E]";
+                modalIconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold shadow-sm border border-[#0ea5e9]/20 bg-[#0ea5e9]/10 text-[#0ea5e9]";
                 
                 // 💎 標題改為「WELCOME」，文字大小設為放大後的 20px 💎
                 modalTitle.innerText = "WELCOME";
-                modalTitle.className = "text-[20px] font-bold tracking-[0.12em] text-[#3E2C18]"; // 羊皮紙深棕
+                modalTitle.className = "text-[20px] font-bold tracking-[0.12em] text-[#0c4a6e]"; // 天空藍深色
                 modalSubtext.innerText = "ACCESS GRANTED";
                 
                 // 💎 成功時只保留一個進入按鈕 💎
@@ -964,13 +960,13 @@
                 // 如果後端有提供真實姓名與班級資料，就完美呈現在卡片面板上
                 if (realName) {
                     modalMessage.innerHTML = `Access granted! Welcome to <strong>Maven</strong>.<br><br>` +
-                                             `<div class="text-left bg-[#8B6F3D]/[0.04] border border-[#8B6F3D]/15 rounded-2xl p-4 space-y-2 mt-2 mb-2 text-xs tracking-wide text-[#3E2C18]">` +
+                                             `<div class="text-left bg-[#0ea5e9]/[0.04] border border-[#0ea5e9]/15 rounded-2xl p-4 space-y-2 mt-2 mb-2 text-xs tracking-wide text-[#0c4a6e]">` +
                                              `<div>• Name: <strong>${realName}</strong></div>` +
                                              `<div>• Class: <strong>${userClass ? userClass : "N/A"} (No. ${classNo ? classNo : "N/A"})</strong></div>` +
                                              `</div>` +
-                                             `Role: <span class="bg-[#5C7C3E]/15 text-[#3E5C1E] px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">${role.toUpperCase()}</span>`;
+                                             `Role: <span class="bg-[#0ea5e9]/15 text-white px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">${role.toUpperCase()}</span>`;
                 } else {
-                    modalMessage.innerHTML = `Access granted! Welcome to <strong>Maven</strong>.<br><br>Role: <span class="bg-[#5C7C3E]/15 text-[#3E5C1E] px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">${role.toUpperCase()}</span>`;
+                    modalMessage.innerHTML = `Access granted! Welcome to <strong>Maven</strong>.<br><br>Role: <span class="bg-[#0ea5e9]/15 text-white px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">${role.toUpperCase()}</span>`;
                 }
                 playLoadingTick(1000);
             } else {
@@ -984,11 +980,11 @@
                 localStorage.setItem('user_class_no', 'N/A');
 
                 modalIconContainer.innerHTML = '👤';
-                modalIconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-sm border border-[#8B6F3D]/25 bg-[#8B6F3D]/10 text-[#8B6F3D]";
+                modalIconContainer.className = "w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-sm border border-[#0ea5e9]/25 bg-[#0ea5e9]/10 text-[#0ea5e9]";
                 
                 // 💎 標題同樣使用大字型的「WELCOME」 💎
                 modalTitle.innerText = "WELCOME";
-                modalTitle.className = "text-[20px] font-bold tracking-[0.12em] text-[#5C4A2E]";
+                modalTitle.className = "text-[20px] font-bold tracking-[0.12em] text-[#64748b]";
                 modalSubtext.innerText = "VISITOR ENTRANCE";
                 
                 // 💎 失敗時提供雙按鈕：繼續進入（訪客）或是重新登入 💎
@@ -1070,8 +1066,8 @@
             const errorMsg = document.getElementById('error-msg');
             const launchBtn = document.getElementById('launch-btn');
 
-            // 1. 平滑還原為資料庫背景圖片與羊皮紙米色基底
-            document.body.style.backgroundColor = "#E8DCBE";
+            // 1. 平滑還原為資料庫背景圖片與天空藍基底
+            document.body.style.backgroundColor = "#f0f9ff";
             if (currentBgUrl) {
                 document.body.style.backgroundImage = `url('${currentBgUrl}')`;
             }
@@ -1082,9 +1078,9 @@
             }
 
             // 3. 還原磨砂玻璃卡片本體樣式
-            landing.style.background = "rgba(255, 255, 255, 0.45)";
-            landing.style.borderColor = "rgba(255, 255, 255, 0.4)";
-            landing.style.boxShadow = "0 30px 70px rgba(0, 0, 0, 0.12)";
+            landing.style.background = "rgba(240, 249, 255, 0.65)";
+            landing.style.borderColor = "rgba(14, 165, 233, 0.3)";
+            landing.style.boxShadow = "0 30px 70px rgba(12, 74, 110, 0.12)";
             landing.style.backdropFilter = "blur(25px)";
             landing.style.webkitBackdropFilter = "blur(25px)";
             landing.style.transform = "translateY(0px)";
