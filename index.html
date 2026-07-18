@@ -1,4 +1,65 @@
 <!DOCTYPE html>
+<!--
+    ╔══════════════════════════════════════════════════════════════════════════╗
+    ║  MAVEN — English Learning Login Interface                                ║
+    ║  Ning Po No.2 College · Department of English                            ║
+    ╠══════════════════════════════════════════════════════════════════════════╣
+    ║                                                                          ║
+    ║  📐 DESIGN SPEC                                                          ║
+    ║  ─────────────                                                           ║
+    ║  • Theme:   Parchment (warm cream / sepia / antique gold)               ║
+    ║  • Mood:    Academic, refined, like a vintage English dictionary       ║
+    ║  • Layout:  Single centered glass card on a fluid background            ║
+    ║                                                                          ║
+    ║  🎨 COLOR PALETTE                                                        ║
+    ║  ────────────────                                                        ║
+    ║  Background default : #f0f9ff    fresh pale sky blue                     ║
+    ║  Glass card          : rgba(240,249,255,0.65)  + blur(25px)            ║
+    ║  Card border         : rgba(14,165,233,0.30)   sky blue hairline        ║
+    ║  Primary text        : #0c4a6e   deep sky blue                          ║
+    ║  Secondary text      : #64748b   slate gray                              ║
+    ║  Accent / brand      : #0ea5e9   sky blue                               ║
+    ║  Success accent      : #0ea5e9   sky blue                               ║
+    ║  Loading / progress  : #0ea5e9   sky blue                               ║
+    ║                                                                          ║
+    ║  🔤 TYPOGRAPHY                                                           ║
+    ║  ──────────────                                                          ║
+    ║  Dept school name  : Geomini  bold uppercase   (loaded from system)      ║
+    ║  Dept subtitle     : Geomini  semibold        (fallback: Geomanist,      ║
+    ║                                              Futura, Avenir, Century…)   ║
+    ║  App name "Maven"  : Playfair Display  bold    (serif, humanist)         ║
+    ║  UI body / labels  : Inter      medium/semibold (UI sans-serif)         ║
+    ║  Floating words    : Playfair Display  serif   (dictionary entry style)  ║
+    ║  Footer copyright  : Inter      uppercase      (small caps)              ║
+    ║                                                                          ║
+    ║  🌀 MOTION CHOREOGRAPHY                                                   ║
+    ║  ──────────────────────                                                  ║
+    ║  Ambient:    Dictionary headwords + part-of-speech drift in background   ║
+    ║              (random position, fade in/out, 2.6–4.4s lifecycle)          ║
+    ║                                                                          ║
+    ║  Page load:  0.00s  parent card fades in                                 ║
+    ║              0.15s  dept school name rises in                            ║
+    ║              1.35s  dept fades out                                       ║
+    ║              1.50s  app row (icon + Maven) rises in (overlaps dept out)  ║
+    ║              2.15s  final state: dept hidden, app shown                  ║
+    ║                                                                          ║
+    ║  Click Maven: Smooth transit — app fades out (0.6s) → dept rises in     ║
+    ║              (0.6s) → dept fades out (0.6s) → app rises in (0.65s).     ║
+    ║              Same keyframes as initial load, replayable infinitely.      ║
+    ║                                                                          ║
+    ║  Login:       Pre-launch fade-out → progress bar 0→100% →               ║
+    ║              Welcome modal (iOS frosted glass) → redirect.               ║
+    ║                                                                          ║
+    ║  🏗️  ARCHITECTURE                                                         ║
+    ║  ─────────────────                                                       ║
+    ║  Single-file SPA, vanilla HTML/CSS/JS (no build step).                  ║
+    ║  Backend: Google Apps Script "Guard API" for credential validation.      ║
+    ║  PWA: standalone display, theme-color #0ea5e9, app icon linked.        ║
+    ║  Background: optional Google Sheet ELEMENTS!LOGIN_BG override.           ║
+    ║  Auth result cached in localStorage (jwt_token, user_role, identity).    ║
+    ║                                                                          ║
+    ╚══════════════════════════════════════════════════════════════════════════╝
+-->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
