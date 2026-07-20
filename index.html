@@ -54,7 +54,9 @@
     ║  ─────────────────                                                       ║
     ║  Single-file SPA, vanilla HTML/CSS/JS (no build step).                  ║
     ║  Backend: Google Apps Script "Guard API" for credential validation.      ║
-    ║  PWA: standalone display, theme-color #0ea5e9, app icon linked.        ║
+    ║  PWA: standalone, manifest at /Mavenstudio/manifest.json, SW at        ║
+    ║       /Mavenstudio/sw.js (network-first HTML, cache-first static),      ║
+    ║       maskable icons (192/512), theme-color #0ea5e9, install pill.     ║
     ║  Background: optional Google Sheet ELEMENTS!LOGIN_BG override.           ║
     ║  Auth result cached in localStorage (jwt_token, user_role, identity).    ║
     ║                                                                          ║
@@ -66,19 +68,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Maven | English Learning</title>
 
-    <!-- Favicon -->
-    <link class="favicon" rel="icon" type="image/jpeg" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
-    <link class="shortcut icon" rel="shortcut icon" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
-    
+    <!-- Favicon (Mavenstudio brand icons — dedicated 16/32/180/192/512 sizes) -->
+    <link rel="icon" type="image/png" sizes="16x16" href="https://phyuaaphysics.github.io/Mavenstudio/icon/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://phyuaaphysics.github.io/Mavenstudio/icon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://phyuaaphysics.github.io/Mavenstudio/icon/appicon_192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://phyuaaphysics.github.io/Mavenstudio/icon/appicon_512.png">
+    <link rel="shortcut icon" type="image/png" href="https://phyuaaphysics.github.io/Mavenstudio/icon/favicon-32x32.png">
+
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#0ea5e9">
+    <meta name="background-color" content="#f0f9ff">
+    <meta name="color-scheme" content="light">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Maven">
-    <link class="apple-touch-icon" href="https://i.ibb.co/zVgbyJvd/appeng.jpg">
-    
-    <!-- 外部 Manifest 連結 -->
-    <link class="manifest" rel="manifest" href="https://phyuaaphysics.github.io/phyustudio/manifest.json">
+    <meta name="application-name" content="Maven">
+    <meta name="description" content="Maven — English Learning Studio. Ning Po No.2 College, Department of English.">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Apple Touch Icon (iOS uses the dedicated 180x180) -->
+    <link rel="apple-touch-icon" sizes="180x180" href="https://phyuaaphysics.github.io/Mavenstudio/icon/apple-touch-icon.png">
+
+    <!-- iOS Splash Screens (use the 512 icon as a solid-letterbox splash on every iOS device size) -->
+    <link rel="apple-touch-startup-image" href="https://phyuaaphysics.github.io/Mavenstudio/icon/appicon_512.png">
+
+    <!-- External Manifest (Mavenstudio) -->
+    <link rel="manifest" href="https://phyuaaphysics.github.io/Mavenstudio/manifest.json">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Cinzel:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -94,6 +110,7 @@
            6. Dictionary words   — headword (serif bold) + POS (italic sepia)
            7. iOS modal          — frosted glass welcome / status dialog
            8. iOS button         — interactive micro-bounce on press
+           9. PWA install pill   — glass pill shown on beforeinstallprompt
            ===================================================================== */
 
         @keyframes fadeIn {
@@ -331,6 +348,79 @@
             background: rgba(12, 74, 110, 0.92);
             color: #f0f9ff;
         }
+
+        /* 9. PWA install pill — minimal, glass, sky-blue to match the design */
+        .pwa-install-pill {
+            position: fixed;
+            right: 16px;
+            bottom: 32px;
+            z-index: 40;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            height: 36px;
+            padding: 0 12px 0 14px;
+            border-radius: 9999px;
+            background: rgba(240, 249, 255, 0.78);
+            border: 1px solid rgba(14, 165, 233, 0.28);
+            box-shadow: 0 10px 28px rgba(12, 74, 110, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            color: #0c4a6e;
+            font: 600 10px/1 "Inter", system-ui, sans-serif;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(14px) scale(0.96);
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .pwa-install-pill.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .pwa-install-pill .pwa-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            object-fit: cover;
+            box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.25);
+        }
+        .pwa-install-pill .pwa-close {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 9999px;
+            background: transparent;
+            border: 0;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            padding: 0;
+            transition: color 0.2s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .pwa-install-pill .pwa-close:hover {
+            color: #0c4a6e;
+            background: rgba(14, 165, 233, 0.1);
+        }
+        .pwa-install-pill .pwa-label {
+            white-space: nowrap;
+        }
+        @media (max-width: 480px) {
+            .pwa-install-pill { right: 12px; bottom: 28px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pwa-install-pill {
+                transition: opacity 0.2s linear;
+                transform: none;
+            }
+        }
     </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen m-0">
@@ -483,6 +573,13 @@
         </p>
     </footer>
 
+    <!-- 💎 PWA install pill (only shown when beforeinstallprompt fires) 💎 -->
+    <button id="pwa-install-btn" class="pwa-install-pill" type="button" aria-label="Install Maven app" hidden>
+        <img class="pwa-icon" src="https://phyuaaphysics.github.io/Mavenstudio/icon/favicon-32x32.png" alt="" aria-hidden="true">
+        <span class="pwa-label">Install Maven</span>
+        <span class="pwa-close" id="pwa-install-close" role="button" tabindex="0" aria-label="Dismiss install prompt" title="Dismiss">&times;</span>
+    </button>
+
     <script>
         /* =====================================================================
            ⚙️  SCRIPT INDEX
@@ -499,6 +596,8 @@
                                → showWelcomeModal() → confirmWelcomeRedirect()
            • Click replay    : replayAnimation() uses Web Animations API
            • Error recovery  : rollbackSystem() restores UI after a failed login
+           • PWA install     : setupPwaInstallPrompt() shows a glass pill when
+                               the browser fires beforeinstallprompt
            ===================================================================== */
 
         let formulaInterval;
@@ -510,14 +609,115 @@
         // 🔗 轉跳目標主網頁明文網址 🔗
         const TARGET_URL = "https://phyuaaphysics.github.io/Mavenstudio/mavenhome.html";
 
-        // PWA Service Worker 註冊
+        // PWA Service Worker 註冊 (Mavenstudio) + 自動更新檢查
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('https://phyuaaphysics.github.io/phyustudio/sw.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW registration failed', err));
+                navigator.serviceWorker.register('https://phyuaaphysics.github.io/Mavenstudio/sw.js', {
+                    scope: 'https://phyuaaphysics.github.io/Mavenstudio/'
+                })
+                .then(reg => {
+                    console.log('[Maven SW] registered, scope =', reg.scope);
+                    // If a new SW is waiting, prompt it to activate immediately.
+                    if (reg.waiting) {
+                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                    reg.addEventListener('updatefound', () => {
+                        const installing = reg.installing;
+                        if (!installing) return;
+                        installing.addEventListener('statechange', () => {
+                            if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('[Maven SW] update installed, reloading on next visit');
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.log('[Maven SW] registration failed', err));
             });
         }
+
+        // 💎 PWA install prompt — show a small glass pill when the browser offers install
+        (function setupPwaInstallPrompt() {
+            const PILL_DISMISS_KEY = 'maven_pwa_install_dismissed_v1';
+            const installBtn  = document.getElementById('pwa-install-btn');
+            const closeBtn    = document.getElementById('pwa-install-close');
+            if (!installBtn) return;
+
+            // Hide the pill until we know the browser actually supports an install flow.
+            installBtn.hidden = true;
+
+            // Detect standalone mode (already installed) — in that case do nothing.
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                || window.matchMedia('(display-mode: minimal-ui)').matches
+                || window.navigator.standalone === true;
+            if (isStandalone) return;
+
+            // If the user already dismissed for this session, do not re-show.
+            let deferredPrompt = null;
+
+            const showPill = () => {
+                if (sessionStorage.getItem(PILL_DISMISS_KEY) === '1') return;
+                installBtn.hidden = false;
+                // double rAF so the hidden → visible transition actually animates
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    installBtn.classList.add('visible');
+                }));
+            };
+
+            const hidePill = () => {
+                installBtn.classList.remove('visible');
+                setTimeout(() => { installBtn.hidden = true; }, 500);
+            };
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Stash the event so the user can trigger the install later.
+                e.preventDefault();
+                deferredPrompt = e;
+                // Only show the pill a moment after first paint, so it does not
+                // compete with the entrance animation of the glass card.
+                setTimeout(showPill, 1800);
+            });
+
+            installBtn.addEventListener('click', async (e) => {
+                // Ignore clicks that bubbled up from the close button.
+                if (e.target.closest && e.target.closest('#pwa-install-close')) return;
+                if (!deferredPrompt) {
+                    // Browser did not offer a prompt; just hide the pill gracefully.
+                    hidePill();
+                    return;
+                }
+                installBtn.classList.remove('visible');
+                try {
+                    deferredPrompt.prompt();
+                    const choice = await deferredPrompt.userChoice;
+                    console.log('[Maven PWA] install choice:', choice.outcome);
+                } catch (err) {
+                    console.warn('[Maven PWA] install prompt error', err);
+                }
+                deferredPrompt = null;
+                setTimeout(() => { installBtn.hidden = true; }, 500);
+            });
+
+            const dismiss = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                sessionStorage.setItem(PILL_DISMISS_KEY, '1');
+                hidePill();
+            };
+            if (closeBtn) {
+                closeBtn.addEventListener('click', dismiss);
+                closeBtn.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter' || ev.key === ' ') dismiss(ev);
+                });
+            }
+
+            window.addEventListener('appinstalled', () => {
+                console.log('[Maven PWA] installed');
+                deferredPrompt = null;
+                hidePill();
+            });
+        })();
 
         // 從試算表 ELEMENTS 分頁載入 LOGIN_BG 背景圖 (改用 JSONP 方式避免 Sandbox Iframe 中的 CORS 阻擋)
         function loadBackgroundFromSheet() {
