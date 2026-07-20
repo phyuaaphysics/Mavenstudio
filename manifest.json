@@ -1,0 +1,71 @@
+{
+  "name": "Maven — English Learning",
+  "short_name": "Maven",
+  "description": "Maven English Learning Studio — Ning Po No.2 College, Department of English.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "/Mavenstudio/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
+  "theme_color": "#0ea5e9",
+  "background_color": "#f0f9ff",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "books", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon/appicon_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon/appicon_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon/appicon_512.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Maven Home",
+      "short_name": "Home",
+      "description": "Open the Maven learning studio home",
+      "url": "./mavenhome.html",
+      "icons": [
+        {
+          "src": "icon/appicon_192.png",
+          "sizes": "192x192",
+          "type": "image/png",
+          "purpose": "any maskable"
+        }
+      ]
+    }
+  ]
+}
